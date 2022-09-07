@@ -1,5 +1,24 @@
 <?php
 $numberOfOperations = $_GET['numberOfOperations'] ?? 0;
+
+$fromJson = json_decode(file_get_contents('config.json'), true);
+
+for ($i = 0; $i < $fromJson[0]['numberOfOperations']; $i++) {
+    $operationDescription[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['operationDescription'] ?? "";
+    $address[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['address'] ?? "";
+    $operationDate[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['operationDate'] ?? "";
+    $operationTime[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['operationTime'] ?? "";
+
+    $oneNineteen[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['1-19'] ?? "";
+    $oneFortyTwo[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['1-42'] ?? "";
+    $twoFortyTwo[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['2-42'] ?? "";
+    $threeFortyEight[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['3-48'] ?? "";
+
+    $oil[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['oil'] ?? "";
+    $hoseCart[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['hoseCart'] ?? "";
+    $drk[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['drk'] ?? "";
+    $police[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['police'] ?? "";
+}
 ?>
 
 <!DOCTYPE html>
@@ -24,10 +43,18 @@ if ($numberOfOperations == 0 && empty($_POST)) {
 }
 ?>
 
+<?
+if (isset($numberOfOperations[1])) {
+    echo $numberOfOperations[1];
+}
+?>
+
 <?php
 if ($numberOfOperations != 0 && empty($_POST)) {
     ?>
     <form action="setup.php" method="POST">
+
+        <input name="numberOfOperations" value="<?php echo $numberOfOperations; ?>" hidden>
 
         <?php
         for ($i = 0; $i < $numberOfOperations; $i++) {
@@ -36,34 +63,77 @@ if ($numberOfOperations != 0 && empty($_POST)) {
             <p>| Einsatznummer <?php echo $i + 1; ?> |</p>
             <p>-------------------------</p>
 
-            <input name="numberOfOperations" value="<?php echo $numberOfOperations; ?>" hidden>
             <input name="operationNumber<?php echo "-" . ($i + 1); ?>" value="<?php echo $i + 1; ?>" hidden>
             <label for="operationDescription">Einsatzbeschreibung</label>
-            <input type="text" id="operationDescription" name="operationDescription<?php echo "-" . ($i + 1); ?>"><br>
+            <input type="text" id="operationDescription" name="operationDescription<?php echo "-" . ($i + 1); ?>"
+                   value="<?php echo $operationDescription[$i + 1] ?? ""; ?>"><br>
             <label for="address">Adresse</label>
-            <input type="text" id="address" name="address<?php echo "-" . ($i + 1); ?>"><br>
+            <input type="text" id="address" name="address<?php echo "-" . ($i + 1); ?>"
+                   value="<?php echo $address[$i + 1] ?? ""; ?>"><br>
             <label for="operationDate">Einsatzdatum</label>
-            <input type="date" id="operationDate" name="operationDate<?php echo "-" . ($i + 1); ?>"><br>
+            <input type="date" id="operationDate" name="operationDate<?php echo "-" . ($i + 1); ?>"
+                   value="<?php echo $operationDate[$i + 1] ?? ""; ?>"><br>
             <label for="operationTime">Einsatzuhrzeit</label>
-            <input type="time" id="operationTime" name="operationTime<?php echo "-" . ($i + 1); ?>"><br>
+            <input type="time" id="operationTime" name="operationTime<?php echo "-" . ($i + 1); ?>"
+                   value="<?php echo $operationTime[$i + 1] ?? ""; ?>"><br>
 
             <label for="1/19">1/19</label>
-            <input type="checkbox" id="1/19" name="1/19<?php echo "-" . ($i + 1); ?>"><br>
+            <input type="checkbox" id="1/19" name="1/19<?php echo "-" . ($i + 1); ?>"
+                <?php if (isset($oneNineteen[$i + 1])) {
+                    if ($oneNineteen[$i + 1] == "on") {
+                        echo "checked";
+                    }
+                } ?>><br>
             <label for="1/42">1/42</label>
-            <input type="checkbox" id="1/42" name="1/42<?php echo "-" . ($i + 1); ?>"><br>
+            <input type="checkbox" id="1/42" name="1/42<?php echo "-" . ($i + 1); ?>"
+                <?php if (isset($oneFortyTwo[$i + 1])) {
+                    if ($oneFortyTwo[$i + 1] == "on") {
+                        echo "checked";
+                    }
+                } ?>><br>
             <label for="2/42">2/42</label>
-            <input type="checkbox" id="2/42" name="2/42<?php echo "-" . ($i + 1); ?>"><br>
+            <input type="checkbox" id="2/42" name="2/42<?php echo "-" . ($i + 1); ?>"
+                <?php if (isset($twoFortyTwo[$i + 1])) {
+                    if ($twoFortyTwo[$i + 1] == "on") {
+                        echo "checked";
+                    }
+                } ?>><br>
             <label for="3/48">3/48</label>
-            <input type="checkbox" id="3/48" name="3/48<?php echo "-" . ($i + 1); ?>"><br>
+            <input type="checkbox" id="3/48" name="3/48<?php echo "-" . ($i + 1); ?>"
+                <?php if (isset($threeFortyEight[$i + 1])) {
+                    if ($threeFortyEight[$i + 1] == "on") {
+                        echo "checked";
+                    }
+                } ?>><br>
 
             <label for="oil">Öl</label>
-            <input type="checkbox" id="oil" name="oil<?php echo "-" . ($i + 1); ?>"><br>
+            <input type="checkbox" id="oil" name="oil<?php echo "-" . ($i + 1); ?>"
+                <?php if (isset($oil[$i + 1])) {
+                    if ($oil[$i + 1] == "on") {
+                        echo "checked";
+                    }
+                } ?>><br>
             <label for="hoseCart">SW</label>
-            <input type="checkbox" id="hoseCart" name="hoseCart<?php echo "-" . ($i + 1); ?>"><br>
+            <input type="checkbox" id="hoseCart" name="hoseCart<?php echo "-" . ($i + 1); ?>"
+                <?php if (isset($hoseCart[$i + 1])) {
+                    if ($hoseCart[$i + 1] == "on") {
+                        echo "checked";
+                    }
+                } ?>><br>
             <label for="drk">DRK</label>
-            <input type="checkbox" id="drk" name="drk<?php echo "-" . ($i + 1); ?>"><br>
+            <input type="checkbox" id="drk" name="drk<?php echo "-" . ($i + 1); ?>"
+                <?php if (isset($drk[$i + 1])) {
+                    if ($drk[$i + 1] == "on") {
+                        echo "checked";
+                    }
+                } ?>><br>
             <label for="police">POL</label>
-            <input type="checkbox" id="police" name="police<?php echo "-" . ($i + 1); ?>"><br>
+            <input type="checkbox" id="police" name="police<?php echo "-" . ($i + 1); ?>"
+                <?php if (isset($police[$i + 1])) {
+                    if ($police[$i + 1] == "on") {
+                        echo "checked";
+                    }
+                } ?>><br>
 
             <?php
         }
@@ -78,6 +148,10 @@ if ($numberOfOperations != 0 && empty($_POST)) {
 if (!empty($_POST)) {
 
     $json = "[";
+
+    if (isset($_POST['numberOfOperations']) && $_POST['numberOfOperations'] > 1) {
+        $json .= '{"numberOfOperations": "' . $_POST['numberOfOperations'] . '"},';
+    }
 
     for ($i = 0; $i < $_POST['numberOfOperations']; $i++) {
         $postArray = array(
