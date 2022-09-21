@@ -7,6 +7,13 @@
     "copyrightSource": "https://github.com/Gamify-IT/third-party-license-notice/blob/v0.0.4/LICENSE"
   },
   {
+    "licTypeName": "MIT",
+    "compName": "jquery",
+    "compVersion": "3.5.1",
+    "copyright": "Copyright JS Foundation and other contributors, https://js.foundation/",
+    "copyrightSource": "https://github.com/jquery/jquery/blob/3.5.1/LICENSE.txt"
+  },
+  {
     "licTypeName": "PSF",
     "compName": "python",
     "compVersion": "3.10.6",
