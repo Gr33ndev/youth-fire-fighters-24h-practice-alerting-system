@@ -6,6 +6,9 @@ First, a configuration can be created and then the software "alarms" at the spec
 
 ```json
 [{
+    "numberOfOperations": int
+  },
+  {
   "operationNumber": int,
   "operationDescription": string,
   "address": string,
