@@ -1,0 +1,185 @@
+<!DOCTYPE>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Third Party License Notice</title>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.js">
+    </script>
+
+    <style>
+        table {
+            margin: 0 auto;
+            width: 80%;
+            word-wrap: break-word;
+            word-break: break-all;
+            border-collapse: collapse;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        tr:nth-child(even) {
+            background-color: #eee;
+        }
+
+        tr:nth-child(odd) {
+            background-color: #fff;
+        }
+
+        th,
+        td {
+            padding: 10px;
+        }
+
+        p {
+            margin: 0 auto;
+            padding: 0 15%;
+            text-align: center;
+        }
+
+        #links {
+            text-decoration: underline 1px;
+            text-underline-offset: 0.2em;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        a, a:visited {
+            white-space: nowrap;
+            padding: 0.5%;
+            color: rgb(1, 46, 121);
+        }
+
+    </style>
+</head>
+
+<body>
+<section>
+    <h1>Third Party License Notice</h1>
+    <p>The "youth-fire-fighters-24h-practise-alerting-system" software uses open source software (OSS). Insofar as the
+        applicable license conditions provide for a publication obligation, the copyright notices and license texts for
+        the OSS components used are listed below:</p><br/>
+
+    <div id="licenseNotes"></div>
+
+    <script>
+
+        const licensesTexts = {
+            dummy: "dummy"
+        };
+
+        $(document).ready(function () {
+            $.getJSON("Licenses.json",
+                function (data) {
+                    $.each(data, function (key, value) {
+                        licensesTexts[value.licTypeName] = value.licText;
+                    });
+                });
+        });
+
+        $(document).ready(function () {
+            $.getJSON("LicenseNotes.json",
+                function (data) {
+                    let licenseNote = '';
+
+                    const licenseTypes = [];
+
+                    $.each(data, function (key, value) {
+                        licenseTypes.push(value.licTypeName);
+                    });
+
+                    licenseTypes.sort();
+
+                    licenseNote += '<div id="links">';
+                    for (let i = 0; i < licenseTypes.length; i++) {
+                        if (!licenseNote.includes('<a href="#' + licenseTypes[i] + '">' + licenseTypes[i] + '</a>')) {
+                            licenseNote += '<a href="#' + licenseTypes[i] + '">' + licenseTypes[i] + '</a>';
+                        }
+                    }
+                    licenseNote += '</div>';
+
+                    for (let j = 0; j < licenseTypes.length; j++) {
+                        if (!licenseNote.includes('<b><h3 id="' + licenseTypes[j] + '" style="text-align: center">' + licenseTypes[j] + '</h3></b>')) {
+                            licenseNote += '<b><h3 id="' + licenseTypes[j] + '" style="text-align: center">' + licenseTypes[j] + '</h3></b>';
+                            licenseNote += '<table id="Table-' + licenseTypes[j] + '">' +
+                                '        <tr>' +
+                                '            <th style="min-width: 35%; max-width: 35%; text-align: left;">Component name</th>' +
+                                '            <th style="min-width: 25%; max-width: 25%; text-align: left;">Version</th>' +
+                                '            <th style="min-width: 40%; max-width: 40%; text-align: left;">Copyright</th>' +
+                                '        </tr>';
+                        }
+
+                        $.each(data, function (key, value) {
+                            if (licenseTypes[j] === value.licTypeName) {
+                                let avoidDuplicatesString = "";
+                                avoidDuplicatesString += '<tr>';
+                                avoidDuplicatesString += '<td>' + value.compName.replaceAll("\n", "<br/>") + '</td>';
+                                avoidDuplicatesString += '<td>' + value.compVersion.replaceAll("\n", "<br/>") + '</td>';
+                                if (value.copyrightSource !== "") {
+                                    avoidDuplicatesString += '<td><a href="' + value.copyrightSource + '" target="_blank" style="text-decoration: none;">' + value.copyright.replaceAll("\n", "<br/>") + '</a></td>';
+                                } else {
+                                    avoidDuplicatesString += '<td>' + value.copyright.replaceAll("\n", "<br/>") + '</td>';
+                                }
+                                avoidDuplicatesString += '</tr>';
+
+                                if (!licenseNote.includes(avoidDuplicatesString)) {
+                                    licenseNote += avoidDuplicatesString;
+                                }
+                            }
+                        });
+
+                        licenseNote += '</table>';
+
+                        if (licensesTexts[licenseTypes[j]] != null && licensesTexts[licenseTypes[j]] !== "") {
+
+                            let licenseText = licensesTexts[licenseTypes[j]].replaceAll("\n", "<br/>");
+
+                            if (!licenseNote.includes('<p style="text-align: left">' + licenseText + '</p>')) {
+                                licenseNote += '<br/><p style="text-align: left"><b>License text:</b></p><br/>';
+                                licenseNote += '<p style="text-align: left">' + licenseText + '</p>';
+                            }
+                        }
+                    }
+
+                    $('#licenseNotes').append(licenseNote);
+
+                    sortTable(1, licenseTypes);
+                    sortTable(0, licenseTypes);
+                });
+        });
+
+        function sortTable(columnToSort, licenseTypes) {
+            for (let j = 0; j < licenseTypes.length; j++) {
+                let table, rows, switching, i, x, y, shouldSwitch;
+                table = document.getElementById("Table-" + licenseTypes[j]);
+                switching = true;
+
+                while (switching) {
+                    switching = false;
+                    rows = table.rows;
+
+                    for (i = 1; i < (rows.length - 1); i++) {
+                        shouldSwitch = false;
+                        x = rows[i].getElementsByTagName("TD")[columnToSort];
+                        y = rows[i + 1].getElementsByTagName("TD")[columnToSort];
+
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                    if (shouldSwitch) {
+                        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                        switching = true;
+                    }
+                }
+            }
+        }
+    </script>
+</section>
+</body>
+
+</html>

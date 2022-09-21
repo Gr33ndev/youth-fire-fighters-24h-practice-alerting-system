@@ -1,0 +1,44 @@
+[
+  {
+    "licTypeName": "MIT",
+    "compName": "Gamify-IT/third-party-license-notice",
+    "compVersion": "v0.0.4",
+    "copyright": "Copyright (c) 2022 Aaron Schmid, Florian Wüst, Gilian Rehm, Ilijaz Mehmedovic, Jonathan Scholz, Leon Hofmeister, Leon Layer, Levi Otterbach, Martin Lautenschlager, Max Kästner, Michael Linder & Timo Schnaible",
+    "copyrightSource": "https://github.com/Gamify-IT/third-party-license-notice/blob/v0.0.4/LICENSE"
+  },
+  {
+    "licTypeName": "PSF",
+    "compName": "python",
+    "compVersion": "3.10.6",
+    "copyright": "Copyright © 2001-2022 Python Software Foundation; All Rights Reserved",
+    "copyrightSource": "https://docs.python.org/3/license.html#psf-license-agreement-for-python-release"
+  },
+  {
+    "licTypeName": "ZPL-2.1",
+    "compName": "python datetime",
+    "compVersion": "4.7",
+    "copyright": "Zope Foundation and Contributors",
+    "copyrightSource": "https://github.com/zopefoundation/DateTime/blob/4.7/COPYRIGHT.txt"
+  },
+  {
+    "licTypeName": "Not Found",
+    "compName": "python json",
+    "compVersion": "?",
+    "copyright": "?",
+    "copyrightSource": ""
+  },
+  {
+    "licTypeName": "Not Found",
+    "compName": "python time",
+    "compVersion": "?",
+    "copyright": "?",
+    "copyrightSource": ""
+  },
+  {
+    "licTypeName": "Not Found",
+    "compName": "python tkinter",
+    "compVersion": "?",
+    "copyright": "?",
+    "copyrightSource": ""
+  }
+]
