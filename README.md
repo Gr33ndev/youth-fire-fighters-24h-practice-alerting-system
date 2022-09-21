@@ -9,19 +9,19 @@ First, a configuration can be created and then the software "alarms" at the spec
     "numberOfOperations": int
   },
   {
-  "operationNumber": int,
-  "operationDescription": string,
-  "address": string,
-  "operationDate": date
-  "operationTime": time,
-  "1-19": boolean,
-  "1-42": boolean,
-  "2-42": boolean,
-  "3-48": boolean,
-  "oil": boolean,
-  "hoseCart": boolean,
-  "drk": boolean,
-  "police": boolean
+    "operationNumber": int,
+    "operationDescription": string,
+    "address": string,
+    "operationDate": date
+    "operationTime": time,
+    "1-19": boolean,
+    "1-42": boolean,
+    "2-42": boolean,
+    "3-48": boolean,
+    "oil": boolean,
+    "hoseCart": boolean,
+    "drk": boolean,
+    "police": boolean
 },
 ...]
 ```
