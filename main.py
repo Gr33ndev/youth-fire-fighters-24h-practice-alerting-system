@@ -1,57 +1,77 @@
 # importing the required modules
 import json
 import time
-import tkinter as tk
 from datetime import datetime
 from tkinter import *
 
 blink_time_in_minutes = 1
+default_operation_description = "Derzeit kein Alarm"
+default_address = "Ihr könnt ja Knoten & Stiche üben :-)"
 
 root = Tk()
 
 root.title("Youth Fire Fighters 24h Practise Alerting System by Gilian Rehm")
 
-root.geometry("775x350")
+root.geometry("750x350")
+
+root.grid()
+
+description_frame = Frame(root, width=775, height=50, borderwidth=1, relief="solid")
+description_frame.grid(row=0, column=1, columnspan=4)
+description_label = Label(description_frame, text="Description", font=("Arial", 20), width=80)
+description_label.pack()
+
+address_frame = Frame(root, width=775, height=50, borderwidth=1, relief="solid")
+address_frame.grid(row=1, column=1, columnspan=4)
+address_label = Label(address_frame, text="Address", font=("Arial", 16), width=100)
+address_label.pack()
 
 one_nineteen_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-one_nineteen_frame.grid(row=1, column=1, sticky=tk.E + tk.W + tk.N + tk.S)
+one_nineteen_frame.grid(row=2, column=1)
 one_nineteen_label = Label(one_nineteen_frame, text="1-19", width=20, height=10)
 one_nineteen_label.pack()
 
 one_forty_two_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-one_forty_two_frame.grid(row=1, column=2, sticky=tk.E + tk.W + tk.N + tk.S)
+one_forty_two_frame.grid(row=2, column=2)
 one_forty_two_label = Label(one_forty_two_frame, text="1-42", width=20, height=10)
-one_forty_two_label.pack(fill=BOTH, expand=1)
+one_forty_two_label.pack()
 
 two_forty_two_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-two_forty_two_frame.grid(row=1, column=3, sticky=tk.E + tk.W + tk.N + tk.S)
+two_forty_two_frame.grid(row=2, column=3)
 two_forty_two_label = Label(two_forty_two_frame, text="2-42", width=20, height=10)
-two_forty_two_label.pack(fill=BOTH, expand=1)
+two_forty_two_label.pack()
 
 three_forty_eight_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-three_forty_eight_frame.grid(row=1, column=4, sticky=tk.E + tk.W + tk.N + tk.S)
+three_forty_eight_frame.grid(row=2, column=4)
 three_forty_eight_label = Label(three_forty_eight_frame, text="3-48", width=20, height=10)
-three_forty_eight_label.pack(fill=BOTH, expand=1)
+three_forty_eight_label.pack()
 
 oil_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-oil_frame.grid(row=2, column=1, sticky=tk.E + tk.W + tk.N + tk.S)
+oil_frame.grid(row=3, column=1)
 oil_label = Label(oil_frame, text="ÖL-A", width=20, height=10)
-oil_label.pack(fill=BOTH, expand=1)
+oil_label.pack()
 
 hose_cart_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-hose_cart_frame.grid(row=2, column=2, sticky=tk.E + tk.W + tk.N + tk.S)
+hose_cart_frame.grid(row=3, column=2)
 hose_cart_label = Label(hose_cart_frame, text="SW-A", width=20, height=10)
-hose_cart_label.pack(fill=BOTH, expand=1)
+hose_cart_label.pack()
 
 drk_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-drk_frame.grid(row=2, column=3, sticky=tk.E + tk.W + tk.N + tk.S)
+drk_frame.grid(row=3, column=3)
 drk_label = Label(drk_frame, text="DRK", width=20, height=10)
-drk_label.pack(fill=BOTH, expand=1)
+drk_label.pack()
 
 police_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-police_frame.grid(row=2, column=4, sticky=tk.E + tk.W + tk.N + tk.S)
+police_frame.grid(row=3, column=4)
 police_label = Label(police_frame, text="POL", width=20, height=10)
-police_label.pack(fill=BOTH, expand=1)
+police_label.pack()
+
+root.grid_columnconfigure(1, weight=1)
+root.grid_columnconfigure(2, weight=1)
+root.grid_columnconfigure(3, weight=1)
+root.grid_columnconfigure(4, weight=1)
+root.grid_rowconfigure(2, weight=1)
+root.grid_rowconfigure(3, weight=1)
 
 root.update()
 
@@ -136,17 +156,6 @@ def police_off():
     police_label.config(bg="SystemButtonFace")
 
 
-def all_off():
-    one_nineteen_off()
-    one_forty_two_off()
-    two_forty_two_off()
-    three_forty_eight_off()
-    oil_off()
-    hose_cart_off()
-    drk_off()
-    police_off()
-
-
 def blink(one_nineteen, one_forty_two, two_forty_two, three_forty_eight, oil, hose_cart, drk, police):
     for i in range(blink_time_in_minutes * 60):
         if one_nineteen:
@@ -218,6 +227,14 @@ def blink(one_nineteen, one_forty_two, two_forty_two, three_forty_eight, oil, ho
         time.sleep(0.5)
 
 
+def setDescription(description):
+    description_label.config(text=description)
+
+
+def setAddress(address):
+    address_label.config(text=address)
+
+
 def on_off_to_bool(on_off):
     if on_off == "on":
         return True
@@ -225,9 +242,34 @@ def on_off_to_bool(on_off):
         return False
 
 
+def init():
+    setAddress(default_address)
+    setDescription(default_operation_description)
+    one_nineteen_off()
+    root.update()
+    one_forty_two_off()
+    root.update()
+    two_forty_two_off()
+    root.update()
+    three_forty_eight_off()
+    root.update()
+    oil_off()
+    root.update()
+    hose_cart_off()
+    root.update()
+    drk_off()
+    root.update()
+    police_off()
+    root.update()
+
+
+init()
+
+
 def alarm(date_time, operation_description, address, one_nineteen, one_forty_two, two_forty_two, three_forty_eight, oil,
           hose_cart, drk, police):
     if datetime.strptime(date_time, "%Y-%m-%d, %H:%M") < datetime.now():
+        print(date_time + " < " + str(datetime.now()))
         return
 
     while True:
@@ -236,9 +278,13 @@ def alarm(date_time, operation_description, address, one_nineteen, one_forty_two
         if date_time == datetime.now().strftime("%Y-%m-%d, %H:%M"):
             print("Alarm is ringing")
 
-            blink(one_nineteen, one_forty_two, two_forty_two,
-                  three_forty_eight, oil, hose_cart,
-                  drk, police)
+            setDescription(operation_description)
+            setAddress(address)
+
+            blink(one_nineteen, one_forty_two, two_forty_two, three_forty_eight, oil, hose_cart, drk, police)
+
+            setDescription(default_operation_description)
+            setAddress(default_address)
 
             print("Alarm is off")
 
@@ -294,3 +340,7 @@ for i in range(numberOfOperations):
               sorted_config_data[i]["1-19"], sorted_config_data[i]["1-42"], sorted_config_data[i]["2-42"],
               sorted_config_data[i]["3-48"], sorted_config_data[i]["oil"], sorted_config_data[i]["hoseCart"],
               sorted_config_data[i]["drk"], sorted_config_data[i]["police"])
+
+# keep alive
+while True:
+    root.update()
