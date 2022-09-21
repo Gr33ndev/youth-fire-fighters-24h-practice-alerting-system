@@ -197,5 +197,7 @@ if (!empty($_POST)) {
     <?php
 }
 ?>
+
+<a href="third-party-license-notices.html">Third Party License Notice</a>
 </body>
 </html>
