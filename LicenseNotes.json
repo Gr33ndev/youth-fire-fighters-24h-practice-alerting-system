@@ -47,5 +47,12 @@
     "compVersion": "?",
     "copyright": "?",
     "copyrightSource": ""
+  },
+  {
+    "licTypeName": "LGPL",
+    "compName": "python pygame",
+    "compVersion": "v2.1.1",
+    "copyright": "",
+    "copyrightSource": ""
   }
 ]
