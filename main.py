@@ -4,7 +4,10 @@ import time
 from datetime import datetime
 from tkinter import *
 
+import pygame
+
 blink_time_in_minutes = 1
+length_of_sound_in_seconds = 30
 default_operation_description = "Derzeit kein Alarm"
 default_address = "Ihr könnt ja Knoten & Stiche üben :-)"
 
@@ -280,6 +283,13 @@ def alarm(date_time, operation_description, address, one_nineteen, one_forty_two
 
             setDescription(operation_description)
             setAddress(address)
+
+            try:
+                pygame.mixer.init()
+                pygame.mixer.music.load("audio.mp3")
+                pygame.mixer.music.play(int(blink_time_in_minutes * 60 / length_of_sound_in_seconds))
+            except:
+                print("Error playing audio")
 
             blink(one_nineteen, one_forty_two, two_forty_two, three_forty_eight, oil, hose_cart, drk, police)
 
