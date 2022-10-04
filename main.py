@@ -18,6 +18,47 @@ root.title("Youth Fire Fighters 24h Practise Alerting System by Gilian Rehm")
 root.geometry("1080x850")
 root.grid()
 
+
+def toggle_fullscreen(event):
+    if root.winfo_screenheight() == root.winfo_height() and root.winfo_screenwidth() == root.winfo_width():
+        root.attributes("-fullscreen", False)
+        resize_images()
+    else:
+        root.attributes("-fullscreen", True)
+        resize_images()
+
+
+root.bind("<F11>", toggle_fullscreen)
+
+
+def resize_images():
+    width = root.winfo_width()
+    height = root.winfo_height()
+
+    if width / 1080 > height / 850:
+        jf_logo_new_width = int(2064 / 10 * (width / 1080))
+        jf_logo_new_height = int(779 / 10 * (width / 1080))
+
+        as2_logo_new_width = int(2628 / 10 * (width / 1080))
+        as2_logo_new_height = int(779 / 10 * (width / 1080))
+    else:
+        jf_logo_new_width = int(2064 / 10 * (height / 850))
+        jf_logo_new_height = int(779 / 10 * (height / 850))
+
+        as2_logo_new_width = int(2628 / 10 * (height / 850))
+        as2_logo_new_height = int(779 / 10 * (height / 850))
+
+    new_jf_logo_resized = jf_logo.resize((jf_logo_new_width, jf_logo_new_height), Image.ANTIALIAS)
+    new_jf_logo_pic = ImageTk.PhotoImage(new_jf_logo_resized)
+    jf_logo_label.configure(image=new_jf_logo_pic)
+    jf_logo_label.image = new_jf_logo_pic
+
+    new_as2_logo_resized = as2_logo.resize((as2_logo_new_width, as2_logo_new_height), Image.ANTIALIAS)
+    new_as2_logo_pic = ImageTk.PhotoImage(new_as2_logo_resized)
+    as2_logo_label.configure(image=new_as2_logo_pic)
+    as2_logo_label.image = new_as2_logo_pic
+
+
 # Config column rows and cols
 Grid.rowconfigure(root, 0, weight=1)
 Grid.rowconfigure(root, 1, weight=0)
@@ -30,19 +71,19 @@ Grid.columnconfigure(root, 3, weight=1)
 Grid.columnconfigure(root, 4, weight=1)
 
 # Add JF logo
-jf_logo_frame = Frame(root, width=2064, height=779, relief="solid")
-jf_logo_frame.grid(row=0, column=1, sticky="nsew")
+jf_logo_frame = Frame(root)
+jf_logo_frame.grid(row=0, column=1, columnspan=2, sticky="nsw")
 jf_logo = Image.open("JF_Logo.png")
-jf_logo_resized = jf_logo.resize((206, 77), Image.ANTIALIAS)
+jf_logo_resized = jf_logo.resize((206, 78), Image.ANTIALIAS)
 jf_logo_pic = ImageTk.PhotoImage(jf_logo_resized)
 jf_logo_label = Label(jf_logo_frame, image=jf_logo_pic)
 jf_logo_label.pack(fill=BOTH, expand=YES)
 
 # Add AS2 logo
-as2_logo_frame = Frame(root, width=2628, height=779, relief="solid")
-as2_logo_frame.grid(row=0, column=4, sticky="nsew")
+as2_logo_frame = Frame(root)
+as2_logo_frame.grid(row=0, column=3, columnspan=2, sticky="nse")
 as2_logo = Image.open("Alarmierungssystem_2.0_Logo.png")
-as2_logo_resized = as2_logo.resize((262, 77), Image.ANTIALIAS)
+as2_logo_resized = as2_logo.resize((263, 78), Image.ANTIALIAS)
 as2_logo_pic = ImageTk.PhotoImage(as2_logo_resized)
 as2_logo_label = Label(as2_logo_frame, image=as2_logo_pic)
 as2_logo_label.pack(fill=BOTH, expand=YES)
@@ -305,6 +346,7 @@ def alarm(date_time, operation_description, address, one_nineteen, one_forty_two
         return
 
     while True:
+        resize_images()
         root.update()
 
         if date_time == datetime.now().strftime("%Y-%m-%d, %H:%M"):
@@ -360,6 +402,9 @@ def set_alarm(operation_description, address, operation_date, operation_time, on
 
     alarm(operation_date + ", " + operation_time, operation_description, address, one_nineteen, one_forty_two,
           two_forty_two, three_forty_eight, oil, hose_cart, unit_one, unit_two)
+
+    resize_images()
+    root.update()
 
 
 config_data = json.load(open("config.json"))
