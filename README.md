@@ -47,8 +47,8 @@ Replace JF_Logo.png (2064x779px) with the logo of your own youth fire fighters l
     "3-48": boolean,
     "oil": boolean,
     "hoseCart": boolean,
-    "drk": boolean,
-    "police": boolean
+    "unitOne": boolean,
+    "unitTwo": boolean
   },
   ...
 ]
