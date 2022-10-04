@@ -6,7 +6,8 @@ First, a configuration can be created and then the software "alarms" at the spec
 ## setup
 
 Replace audio.mp3 with an alarm sound and set ``length_of_sound_in_seconds`` in line 10 in main.py to the length of the
-sound file in seconds.
+sound file in seconds.  
+Replace JF_Logo.png with the logo of your own youth fire fighters logo.
 
 ## structure of config.json
 

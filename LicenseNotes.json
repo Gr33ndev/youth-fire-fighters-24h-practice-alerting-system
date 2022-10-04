@@ -54,5 +54,19 @@
     "compVersion": "v2.1.1",
     "copyright": "",
     "copyrightSource": ""
+  },
+  {
+    "licTypeName": "Not Found",
+    "compName": "python PIL.ImageTk",
+    "compVersion": "?",
+    "copyright": "?",
+    "copyrightSource": ""
+  },
+  {
+    "licTypeName": "Not Found",
+    "compName": "python PIL.Image",
+    "compVersion": "?",
+    "copyright": "?",
+    "copyrightSource": ""
   }
 ]

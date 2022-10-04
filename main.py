@@ -5,6 +5,7 @@ from datetime import datetime
 from tkinter import *
 
 import pygame
+from PIL import ImageTk, Image
 
 turn_on_time_in_seconds = 60  # has to be a multiple of length_of_sound_in_seconds
 length_of_sound_in_seconds = 30
@@ -12,89 +13,99 @@ default_operation_description = "Derzeit kein Alarm"
 default_address = "Ihr könnt ja Knoten & Stiche üben :-)"
 
 root = Tk()
-
+root.iconbitmap("App_Logo.ico")
 root.title("Youth Fire Fighters 24h Practise Alerting System by Gilian Rehm")
-
-root.geometry("1080x720")
-
+root.geometry("1080x850")
 root.grid()
 
 # Config column rows and cols
-Grid.rowconfigure(root, 0, weight=0)
+Grid.rowconfigure(root, 0, weight=1)
 Grid.rowconfigure(root, 1, weight=0)
-Grid.rowconfigure(root, 2, weight=1)
+Grid.rowconfigure(root, 2, weight=0)
 Grid.rowconfigure(root, 3, weight=1)
+Grid.rowconfigure(root, 4, weight=1)
 Grid.columnconfigure(root, 1, weight=1)
 Grid.columnconfigure(root, 2, weight=1)
 Grid.columnconfigure(root, 3, weight=1)
 Grid.columnconfigure(root, 4, weight=1)
 
+# Add JF logo
+jf_logo_frame = Frame(root, width=2064, height=779, relief="solid")
+jf_logo_frame.grid(row=0, column=1, sticky="nsew")
+jf_logo = Image.open("JF_Logo.png")
+jf_logo_resized = jf_logo.resize((206, 77), Image.ANTIALIAS)
+jf_logo_pic = ImageTk.PhotoImage(jf_logo_resized)
+jf_logo_label = Label(jf_logo_frame, image=jf_logo_pic)
+jf_logo_label.pack(fill=BOTH, expand=YES)
+
+# Add AS2 logo
+as2_logo_frame = Frame(root, width=2628, height=779, relief="solid")
+as2_logo_frame.grid(row=0, column=4, sticky="nsew")
+as2_logo = Image.open("Alarmierungssystem_2.0_Logo.jpg")
+as2_logo_resized = as2_logo.resize((262, 77), Image.ANTIALIAS)
+as2_logo_pic = ImageTk.PhotoImage(as2_logo_resized)
+as2_logo_label = Label(as2_logo_frame, image=as2_logo_pic)
+as2_logo_label.pack(fill=BOTH, expand=YES)
+
 # Add description text
 description_frame = Frame(root, width=775, height=50, borderwidth=1, relief="solid", bg="lightgrey")
-description_frame.grid(row=0, column=1, columnspan=4, sticky="nsew")
+description_frame.grid(row=1, column=1, columnspan=4, sticky="nsew")
 description_label = Label(description_frame, text="Description", font=("Arial", 24), width=80, bg="lightgrey")
 description_label.pack()
 
 # Add address text
 address_frame = Frame(root, width=775, height=50, borderwidth=1, relief="solid", bg="lightgrey")
-address_frame.grid(row=1, column=1, columnspan=4, sticky="nsew")
+address_frame.grid(row=2, column=1, columnspan=4, sticky="nsew")
 address_label = Label(address_frame, text="Address", font=("Arial", 20), width=100, bg="lightgrey")
 address_label.pack()
 
 # Add 1/19 label
 one_nineteen_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-one_nineteen_frame.grid(row=2, column=1, sticky="nsew")
+one_nineteen_frame.grid(row=3, column=1, sticky="nsew")
 one_nineteen_label = Label(one_nineteen_frame, text="1-19", width=20, height=10, font=("Arial", 20))
 one_nineteen_label.pack()
 
 # Add 1/42 label
 one_forty_two_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-one_forty_two_frame.grid(row=2, column=2, sticky="nsew")
+one_forty_two_frame.grid(row=3, column=2, sticky="nsew")
 one_forty_two_label = Label(one_forty_two_frame, text="1-42", width=20, height=10, font=("Arial", 20))
 one_forty_two_label.pack()
 
 # Add 2/42 label
 two_forty_two_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-two_forty_two_frame.grid(row=2, column=3, sticky="nsew")
+two_forty_two_frame.grid(row=3, column=3, sticky="nsew")
 two_forty_two_label = Label(two_forty_two_frame, text="2-42", width=20, height=10, font=("Arial", 20))
 two_forty_two_label.pack()
 
 # Add 3/48 label
 three_forty_eight_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-three_forty_eight_frame.grid(row=2, column=4, sticky="nsew")
+three_forty_eight_frame.grid(row=3, column=4, sticky="nsew")
 three_forty_eight_label = Label(three_forty_eight_frame, text="3-48", width=20, height=10, font=("Arial", 20))
 three_forty_eight_label.pack()
 
 # Add oil label
 oil_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-oil_frame.grid(row=3, column=1, sticky="nsew")
+oil_frame.grid(row=4, column=1, sticky="nsew")
 oil_label = Label(oil_frame, text="ÖL-A", width=20, height=10, font=("Arial", 20))
 oil_label.pack()
 
 # Add hose cart label
 hose_cart_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-hose_cart_frame.grid(row=3, column=2, sticky="nsew")
+hose_cart_frame.grid(row=4, column=2, sticky="nsew")
 hose_cart_label = Label(hose_cart_frame, text="SW-A", width=20, height=10, font=("Arial", 20))
 hose_cart_label.pack()
 
 # Add unit 1 label
 unit_one_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-unit_one_frame.grid(row=3, column=3, sticky="nsew")
+unit_one_frame.grid(row=4, column=3, sticky="nsew")
 unit_one_label = Label(unit_one_frame, text="Zug 1", width=20, height=10, font=("Arial", 20))
 unit_one_label.pack()
 
 # Add unit 2 label
 unit_two_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-unit_two_frame.grid(row=3, column=4, sticky="nsew")
+unit_two_frame.grid(row=4, column=4, sticky="nsew")
 unit_two_label = Label(unit_two_frame, text="Zug 2", width=20, height=10, font=("Arial", 20))
 unit_two_label.pack()
-
-root.grid_columnconfigure(1, weight=1)
-root.grid_columnconfigure(2, weight=1)
-root.grid_columnconfigure(3, weight=1)
-root.grid_columnconfigure(4, weight=1)
-root.grid_rowconfigure(2, weight=1)
-root.grid_rowconfigure(3, weight=1)
 
 root.update()
 
