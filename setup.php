@@ -1,23 +1,27 @@
 <?php
+error_reporting(E_ALL ^ E_NOTICE);
+
 $numberOfOperations = $_GET['numberOfOperations'] ?? 0;
 
-$fromJson = json_decode(file_get_contents('config.json'), true);
+if (file_exists('config.json')) {
+    $fromJson = json_decode(file_get_contents('config.json'), true);
 
-for ($i = 0; $i < $fromJson[0]['numberOfOperations']; $i++) {
-    $operationDescription[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['operationDescription'] ?? "";
-    $address[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['address'] ?? "";
-    $operationDate[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['operationDate'] ?? "";
-    $operationTime[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['operationTime'] ?? "";
+    for ($i = 0; $i < $fromJson[0]['numberOfOperations']; $i++) {
+        $operationDescription[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['operationDescription'] ?? "";
+        $address[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['address'] ?? "";
+        $operationDate[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['operationDate'] ?? "";
+        $operationTime[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['operationTime'] ?? "";
 
-    $oneNineteen[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['1-19'] ?? "";
-    $oneFortyTwo[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['1-42'] ?? "";
-    $twoFortyTwo[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['2-42'] ?? "";
-    $threeFortyEight[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['3-48'] ?? "";
+        $oneNineteen[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['1-19'] ?? "";
+        $oneFortyTwo[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['1-42'] ?? "";
+        $twoFortyTwo[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['2-42'] ?? "";
+        $threeFortyEight[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['3-48'] ?? "";
 
-    $oil[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['oil'] ?? "";
-    $hoseCart[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['hoseCart'] ?? "";
-    $unitOne[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['unitOne'] ?? "";
-    $unitTwo[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['unitTwo'] ?? "";
+        $oil[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['oil'] ?? "";
+        $hoseCart[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['hoseCart'] ?? "";
+        $unitOne[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['unitOne'] ?? "";
+        $unitTwo[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['unitTwo'] ?? "";
+    }
 }
 ?>
 
