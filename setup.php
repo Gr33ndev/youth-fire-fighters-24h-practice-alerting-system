@@ -16,8 +16,8 @@ for ($i = 0; $i < $fromJson[0]['numberOfOperations']; $i++) {
 
     $oil[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['oil'] ?? "";
     $hoseCart[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['hoseCart'] ?? "";
-    $drk[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['drk'] ?? "";
-    $police[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['police'] ?? "";
+    $unitOne[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['unitOne'] ?? "";
+    $unitTwo[$fromJson[$i + 1]['operationNumber']] = $fromJson[$i + 1]['unitTwo'] ?? "";
 }
 ?>
 
@@ -120,17 +120,17 @@ if ($numberOfOperations != 0 && empty($_POST)) {
                         echo "checked";
                     }
                 } ?>><br>
-            <label for="drk">DRK</label>
-            <input type="checkbox" id="drk" name="drk<?php echo "-" . ($i + 1); ?>"
-                <?php if (isset($drk[$i + 1])) {
-                    if ($drk[$i + 1] == "on") {
+            <label for="unitOne">Zug 1</label>
+            <input type="checkbox" id="unitOne" name="unitOne<?php echo "-" . ($i + 1); ?>"
+                <?php if (isset($unitOne[$i + 1])) {
+                    if ($unitOne[$i + 1] == "on") {
                         echo "checked";
                     }
                 } ?>><br>
-            <label for="police">POL</label>
-            <input type="checkbox" id="police" name="police<?php echo "-" . ($i + 1); ?>"
-                <?php if (isset($police[$i + 1])) {
-                    if ($police[$i + 1] == "on") {
+            <label for="unitTwo">Zug 2</label>
+            <input type="checkbox" id="unitTwo" name="unitTwo<?php echo "-" . ($i + 1); ?>"
+                <?php if (isset($unitTwo[$i + 1])) {
+                    if ($unitTwo[$i + 1] == "on") {
                         echo "checked";
                     }
                 } ?>><br>
@@ -168,8 +168,8 @@ if (!empty($_POST)) {
 
             "oil" => $_POST['oil' . ("-" . ($i + 1))] ?? "off",
             "hoseCart" => $_POST['hoseCart' . ("-" . ($i + 1))] ?? "off",
-            "drk" => $_POST['drk' . ("-" . ($i + 1))] ?? "off",
-            "police" => $_POST['police' . ("-" . ($i + 1))] ?? "off"
+            "unitOne" => $_POST['unitOne' . ("-" . ($i + 1))] ?? "off",
+            "unitTwo" => $_POST['unitTwo' . ("-" . ($i + 1))] ?? "off"
         );
 
         $json .= json_encode($postArray);

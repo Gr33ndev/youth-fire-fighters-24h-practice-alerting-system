@@ -59,15 +59,15 @@ hose_cart_frame.grid(row=3, column=2)
 hose_cart_label = Label(hose_cart_frame, text="SW-A", width=20, height=10, font=("Arial", 20))
 hose_cart_label.pack()
 
-drk_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-drk_frame.grid(row=3, column=3)
-drk_label = Label(drk_frame, text="DRK", width=20, height=10, font=("Arial", 20))
-drk_label.pack()
+unit_one_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
+unit_one_frame.grid(row=3, column=3)
+unit_one_label = Label(unit_one_frame, text="Zug 1", width=20, height=10, font=("Arial", 20))
+unit_one_label.pack()
 
-police_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-police_frame.grid(row=3, column=4)
-police_label = Label(police_frame, text="POL", width=20, height=10, font=("Arial", 20))
-police_label.pack()
+unit_two_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
+unit_two_frame.grid(row=3, column=4)
+unit_two_label = Label(unit_two_frame, text="Zug 2", width=20, height=10, font=("Arial", 20))
+unit_two_label.pack()
 
 root.grid_columnconfigure(1, weight=1)
 root.grid_columnconfigure(2, weight=1)
@@ -139,27 +139,27 @@ def hose_cart_off():
     hose_cart_label.config(bg="SystemButtonFace")
 
 
-def drk_on():
-    drk_frame.config(bg="red")
-    drk_label.config(bg="red")
+def unit_one_on():
+    unit_one_frame.config(bg="red")
+    unit_one_label.config(bg="red")
 
 
-def drk_off():
-    drk_frame.config(bg="SystemButtonFace")
-    drk_label.config(bg="SystemButtonFace")
+def unit_one_off():
+    unit_one_frame.config(bg="SystemButtonFace")
+    unit_one_label.config(bg="SystemButtonFace")
 
 
-def police_on():
-    police_frame.config(bg="red")
-    police_label.config(bg="red")
+def unit_two_on():
+    unit_two_frame.config(bg="red")
+    unit_two_label.config(bg="red")
 
 
-def police_off():
-    police_frame.config(bg="SystemButtonFace")
-    police_label.config(bg="SystemButtonFace")
+def unit_two_off():
+    unit_two_frame.config(bg="SystemButtonFace")
+    unit_two_label.config(bg="SystemButtonFace")
 
 
-def blink(one_nineteen, one_forty_two, two_forty_two, three_forty_eight, oil, hose_cart, drk, police):
+def blink(one_nineteen, one_forty_two, two_forty_two, three_forty_eight, oil, hose_cart, unit_one, unit_two):
     for i in range(blink_time_in_minutes * 60):
         if one_nineteen:
             one_nineteen_on()
@@ -185,12 +185,12 @@ def blink(one_nineteen, one_forty_two, two_forty_two, three_forty_eight, oil, ho
             hose_cart_on()
             root.update()
 
-        if drk:
-            drk_on()
+        if unit_one:
+            unit_one_on()
             root.update()
 
-        if police:
-            police_on()
+        if unit_two:
+            unit_two_on()
             root.update()
 
         time.sleep(0.5)
@@ -219,12 +219,12 @@ def blink(one_nineteen, one_forty_two, two_forty_two, three_forty_eight, oil, ho
             hose_cart_off()
             root.update()
 
-        if drk:
-            drk_off()
+        if unit_one:
+            unit_one_off()
             root.update()
 
-        if police:
-            police_off()
+        if unit_two:
+            unit_two_off()
             root.update()
 
         time.sleep(0.5)
@@ -260,9 +260,9 @@ def init():
     root.update()
     hose_cart_off()
     root.update()
-    drk_off()
+    unit_one_off()
     root.update()
-    police_off()
+    unit_two_off()
     root.update()
 
 
@@ -270,7 +270,7 @@ init()
 
 
 def alarm(date_time, operation_description, address, one_nineteen, one_forty_two, two_forty_two, three_forty_eight, oil,
-          hose_cart, drk, police):
+          hose_cart, unit_one, unit_two):
     if datetime.strptime(date_time, "%Y-%m-%d, %H:%M") < datetime.now():
         print(date_time + " < " + str(datetime.now()))
         return
@@ -291,7 +291,7 @@ def alarm(date_time, operation_description, address, one_nineteen, one_forty_two
             except:
                 print("Error playing audio")
 
-            blink(one_nineteen, one_forty_two, two_forty_two, three_forty_eight, oil, hose_cart, drk, police)
+            blink(one_nineteen, one_forty_two, two_forty_two, three_forty_eight, oil, hose_cart, unit_one, unit_two)
 
             setDescription(default_operation_description)
             setAddress(default_address)
@@ -302,7 +302,7 @@ def alarm(date_time, operation_description, address, one_nineteen, one_forty_two
 
 
 def set_alarm(operation_description, address, operation_date, operation_time, one_nineteen, one_forty_two,
-              two_forty_two, three_forty_eight, oil, hose_cart, drk, police):
+              two_forty_two, three_forty_eight, oil, hose_cart, unit_one, unit_two):
     if "-" not in operation_date or ":" not in operation_time:
         print("ERROR")
         return
@@ -313,8 +313,8 @@ def set_alarm(operation_description, address, operation_date, operation_time, on
     three_forty_eight = on_off_to_bool(three_forty_eight)
     oil = on_off_to_bool(oil)
     hose_cart = on_off_to_bool(hose_cart)
-    drk = on_off_to_bool(drk)
-    police = on_off_to_bool(police)
+    unit_one = on_off_to_bool(unit_one)
+    unit_two = on_off_to_bool(unit_two)
 
     print("Operation Description: " + operation_description)
     print("Address: " + address)
@@ -325,11 +325,11 @@ def set_alarm(operation_description, address, operation_date, operation_time, on
     print("3-48: " + str(three_forty_eight))
     print("Oil: " + str(oil))
     print("Hose Cart: " + str(hose_cart))
-    print("DRK: " + str(drk))
-    print("Police: " + str(police))
+    print("Zug 1: " + str(unit_one))
+    print("Zug 2: " + str(unit_two))
 
     alarm(operation_date + ", " + operation_time, operation_description, address, one_nineteen, one_forty_two,
-          two_forty_two, three_forty_eight, oil, hose_cart, drk, police)
+          two_forty_two, three_forty_eight, oil, hose_cart, unit_one, unit_two)
 
 
 config_data = json.load(open("config.json"))
@@ -349,7 +349,7 @@ for i in range(numberOfOperations):
               sorted_config_data[i]["operationDate"], sorted_config_data[i]["operationTime"],
               sorted_config_data[i]["1-19"], sorted_config_data[i]["1-42"], sorted_config_data[i]["2-42"],
               sorted_config_data[i]["3-48"], sorted_config_data[i]["oil"], sorted_config_data[i]["hoseCart"],
-              sorted_config_data[i]["drk"], sorted_config_data[i]["police"])
+              sorted_config_data[i]["unitOne"], sorted_config_data[i]["unitTwo"])
 
 # keep alive
 while True:
