@@ -1,6 +1,5 @@
 # importing the required modules
 import json
-import time
 from datetime import datetime
 from tkinter import *
 
@@ -231,6 +230,13 @@ def unit_two_off():
     unit_two_label.config(bg="SystemButtonFace")
 
 
+def wait(time_in_seconds):
+    var = IntVar()
+    root.after(time_in_seconds * 1000, var.set, 1)
+    print("waiting " + str(time_in_seconds) + " seconds...")
+    root.wait_variable(var)
+
+
 def turn_on_wait_turn_off(one_nineteen, one_forty_two, two_forty_two, three_forty_eight, oil, hose_cart, unit_one,
                           unit_two):
     if one_nineteen:
@@ -265,7 +271,7 @@ def turn_on_wait_turn_off(one_nineteen, one_forty_two, two_forty_two, three_fort
         unit_two_on()
         root.update()
 
-    time.sleep(turn_on_time_in_seconds)
+    wait(turn_on_time_in_seconds)
 
     if one_nineteen:
         one_nineteen_off()

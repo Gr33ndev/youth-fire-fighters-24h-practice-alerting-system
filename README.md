@@ -23,6 +23,11 @@ Replace audio.mp3 with an alarm sound and set ``length_of_sound_in_seconds`` in 
 sound file in seconds.  
 Replace JF_Logo.png (2064x779px) with the logo of your own youth fire fighters logo.
 
+## how to use
+
+1. open setup.php and configer all alerts there
+2. start main.py
+
 ## structure of config.json
 
 ```json
