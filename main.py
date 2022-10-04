@@ -6,7 +6,7 @@ from tkinter import *
 
 import pygame
 
-blink_time_in_minutes = 1
+turn_on_time_in_seconds = 60  # has to be a multiple of length_of_sound_in_seconds
 length_of_sound_in_seconds = 30
 default_operation_description = "Derzeit kein Alarm"
 default_address = "Ihr könnt ja Knoten & Stiche üben :-)"
@@ -179,75 +179,73 @@ def unit_two_off():
     unit_two_label.config(bg="SystemButtonFace")
 
 
-def blink(one_nineteen, one_forty_two, two_forty_two, three_forty_eight, oil, hose_cart, unit_one, unit_two):
-    for i in range(blink_time_in_minutes * 60):
-        if one_nineteen:
-            one_nineteen_on()
-            root.update()
+def turn_on_wait_turn_off(one_nineteen, one_forty_two, two_forty_two, three_forty_eight, oil, hose_cart, unit_one,
+                          unit_two):
+    if one_nineteen:
+        one_nineteen_on()
+        root.update()
 
-        if one_forty_two:
-            one_forty_two_on()
-            root.update()
+    if one_forty_two:
+        one_forty_two_on()
+        root.update()
 
-        if two_forty_two:
-            two_forty_two_on()
-            root.update()
+    if two_forty_two:
+        two_forty_two_on()
+        root.update()
 
-        if three_forty_eight:
-            three_forty_eight_on()
-            root.update()
+    if three_forty_eight:
+        three_forty_eight_on()
+        root.update()
 
-        if oil:
-            oil_on()
-            root.update()
+    if oil:
+        oil_on()
+        root.update()
 
-        if hose_cart:
-            hose_cart_on()
-            root.update()
+    if hose_cart:
+        hose_cart_on()
+        root.update()
 
-        if unit_one:
-            unit_one_on()
-            root.update()
+    if unit_one:
+        unit_one_on()
+        root.update()
 
-        if unit_two:
-            unit_two_on()
-            root.update()
+    if unit_two:
+        unit_two_on()
+        root.update()
 
-        time.sleep(0.5)
+    time.sleep(turn_on_time_in_seconds)
 
-        if one_nineteen:
-            one_nineteen_off()
-            root.update()
+    if one_nineteen:
+        one_nineteen_off()
+        root.update()
 
-        if one_forty_two:
-            one_forty_two_off()
-            root.update()
+    if one_forty_two:
+        one_forty_two_off()
+        root.update()
 
-        if two_forty_two:
-            two_forty_two_off()
-            root.update()
+    if two_forty_two:
+        two_forty_two_off()
+        root.update()
 
-        if three_forty_eight:
-            three_forty_eight_off()
-            root.update()
+    if three_forty_eight:
+        three_forty_eight_off()
+        root.update()
 
-        if oil:
-            oil_off()
-            root.update()
+    if oil:
+        oil_off()
+        root.update()
 
-        if hose_cart:
-            hose_cart_off()
-            root.update()
+    if hose_cart:
+        hose_cart_off()
+        root.update()
 
-        if unit_one:
-            unit_one_off()
-            root.update()
+    if unit_one:
+        unit_one_off()
+        root.update()
 
-        if unit_two:
-            unit_two_off()
-            root.update()
-
-        time.sleep(0.5)
+    if unit_two:
+        unit_two_off()
+        root.update()
 
 
 def setDescription(description):
@@ -307,11 +305,12 @@ def alarm(date_time, operation_description, address, one_nineteen, one_forty_two
             try:
                 pygame.mixer.init()
                 pygame.mixer.music.load("audio.mp3")
-                pygame.mixer.music.play(int(blink_time_in_minutes * 60 / length_of_sound_in_seconds))
+                pygame.mixer.music.play(int(turn_on_time_in_seconds / length_of_sound_in_seconds))
             except:
                 print("Error playing audio")
 
-            blink(one_nineteen, one_forty_two, two_forty_two, three_forty_eight, oil, hose_cart, unit_one, unit_two)
+            turn_on_wait_turn_off(one_nineteen, one_forty_two, two_forty_two, three_forty_eight, oil, hose_cart,
+                                  unit_one, unit_two)
 
             setDescription(default_operation_description)
             setAddress(default_address)
