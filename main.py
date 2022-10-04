@@ -15,57 +15,77 @@ root = Tk()
 
 root.title("Youth Fire Fighters 24h Practise Alerting System by Gilian Rehm")
 
-root.geometry("750x350")
+root.geometry("1080x720")
 
 root.grid()
 
+# Config column rows and cols
+Grid.rowconfigure(root, 0, weight=0)
+Grid.rowconfigure(root, 1, weight=0)
+Grid.rowconfigure(root, 2, weight=1)
+Grid.rowconfigure(root, 3, weight=1)
+Grid.columnconfigure(root, 1, weight=1)
+Grid.columnconfigure(root, 2, weight=1)
+Grid.columnconfigure(root, 3, weight=1)
+Grid.columnconfigure(root, 4, weight=1)
+
+# Add description text
 description_frame = Frame(root, width=775, height=50, borderwidth=1, relief="solid", bg="lightgrey")
-description_frame.grid(row=0, column=1, columnspan=4)
+description_frame.grid(row=0, column=1, columnspan=4, sticky="nsew")
 description_label = Label(description_frame, text="Description", font=("Arial", 24), width=80, bg="lightgrey")
 description_label.pack()
 
+# Add address text
 address_frame = Frame(root, width=775, height=50, borderwidth=1, relief="solid", bg="lightgrey")
-address_frame.grid(row=1, column=1, columnspan=4)
+address_frame.grid(row=1, column=1, columnspan=4, sticky="nsew")
 address_label = Label(address_frame, text="Address", font=("Arial", 20), width=100, bg="lightgrey")
 address_label.pack()
 
+# Add 1/19 label
 one_nineteen_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-one_nineteen_frame.grid(row=2, column=1)
+one_nineteen_frame.grid(row=2, column=1, sticky="nsew")
 one_nineteen_label = Label(one_nineteen_frame, text="1-19", width=20, height=10, font=("Arial", 20))
 one_nineteen_label.pack()
 
+# Add 1/42 label
 one_forty_two_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-one_forty_two_frame.grid(row=2, column=2)
+one_forty_two_frame.grid(row=2, column=2, sticky="nsew")
 one_forty_two_label = Label(one_forty_two_frame, text="1-42", width=20, height=10, font=("Arial", 20))
 one_forty_two_label.pack()
 
+# Add 2/42 label
 two_forty_two_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-two_forty_two_frame.grid(row=2, column=3)
+two_forty_two_frame.grid(row=2, column=3, sticky="nsew")
 two_forty_two_label = Label(two_forty_two_frame, text="2-42", width=20, height=10, font=("Arial", 20))
 two_forty_two_label.pack()
 
+# Add 3/48 label
 three_forty_eight_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-three_forty_eight_frame.grid(row=2, column=4)
+three_forty_eight_frame.grid(row=2, column=4, sticky="nsew")
 three_forty_eight_label = Label(three_forty_eight_frame, text="3-48", width=20, height=10, font=("Arial", 20))
 three_forty_eight_label.pack()
 
+# Add oil label
 oil_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-oil_frame.grid(row=3, column=1)
+oil_frame.grid(row=3, column=1, sticky="nsew")
 oil_label = Label(oil_frame, text="ÖL-A", width=20, height=10, font=("Arial", 20))
 oil_label.pack()
 
+# Add hose cart label
 hose_cart_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-hose_cart_frame.grid(row=3, column=2)
+hose_cart_frame.grid(row=3, column=2, sticky="nsew")
 hose_cart_label = Label(hose_cart_frame, text="SW-A", width=20, height=10, font=("Arial", 20))
 hose_cart_label.pack()
 
+# Add unit 1 label
 unit_one_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-unit_one_frame.grid(row=3, column=3)
+unit_one_frame.grid(row=3, column=3, sticky="nsew")
 unit_one_label = Label(unit_one_frame, text="Zug 1", width=20, height=10, font=("Arial", 20))
 unit_one_label.pack()
 
+# Add unit 2 label
 unit_two_frame = Frame(root, width=100, height=100, borderwidth=1, relief="solid")
-unit_two_frame.grid(row=3, column=4)
+unit_two_frame.grid(row=3, column=4, sticky="nsew")
 unit_two_label = Label(unit_two_frame, text="Zug 2", width=20, height=10, font=("Arial", 20))
 unit_two_label.pack()
 
