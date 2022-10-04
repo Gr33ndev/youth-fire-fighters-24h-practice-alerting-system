@@ -3,6 +3,20 @@
 In this repo a software is provided which is used by the youth fire fighters for the 24 hours practise.
 First, a configuration can be created and then the software "alarms" at the specified times to simulate real operations.
 
+## screenshots
+
+### setup page:
+
+<img src="alerting_system_setup_page.png" width="200"><br/>
+
+### alerting system in standby:
+
+<img src="alerting_system_standby.png" width="800"><br/>
+
+### alerting system on alert:
+
+<img src="alerting_system_alerting.png" width="800">
+
 ## setup
 
 Replace audio.mp3 with an alarm sound and set ``length_of_sound_in_seconds`` in line 10 in main.py to the length of the
