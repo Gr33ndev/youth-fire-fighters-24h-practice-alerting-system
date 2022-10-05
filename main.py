@@ -81,7 +81,7 @@ jf_logo_label.pack(fill=BOTH, expand=YES)
 # Add AS2 logo
 as2_logo_frame = Frame(root)
 as2_logo_frame.grid(row=0, column=3, columnspan=2, sticky="nse")
-as2_logo = Image.open("Alarmierungssystem_2.0_Logo.png")
+as2_logo = Image.open("Alarmierungssystem_2.0_Logo.jpg")
 as2_logo_resized = as2_logo.resize((263, 78), Image.ANTIALIAS)
 as2_logo_pic = ImageTk.PhotoImage(as2_logo_resized)
 as2_logo_label = Label(as2_logo_frame, image=as2_logo_pic)
