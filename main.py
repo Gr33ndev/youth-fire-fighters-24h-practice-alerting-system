@@ -6,10 +6,17 @@ from tkinter import *
 import pygame
 from PIL import ImageTk, Image
 
+# ------------------------------------------Settings------------------------------------------
+sleep_time_from = "21:00"
+sleep_time_to = "09:00"
+
 turn_on_time_in_seconds = 60  # has to be a multiple of length_of_sound_in_seconds
 length_of_sound_in_seconds = 30
 default_operation_description = "Derzeit kein Alarm"
 default_address = "Ihr könnt ja Knoten & Stiche üben :-)"
+# --------------------------------------------------------------------------------------------
+
+blackscreen_on = False
 
 root = Tk()
 root.iconbitmap("App_Logo.ico")
@@ -28,6 +35,52 @@ def toggle_fullscreen(event):
 
 
 root.bind("<F11>", toggle_fullscreen)
+
+
+def toggle_blackscreen(event):
+    global blackscreen_on
+    global blackscreen_frame
+
+    if blackscreen_on == False:
+        turn_blackscreen_on()
+    else:
+        turn_blackscreen_off()
+
+
+def turn_blackscreen_on():
+    global blackscreen_on
+    global blackscreen_frame
+
+    blackscreen_frame.grid(row=0, column=0, columnspan=6, rowspan=6, sticky="nsew")
+    blackscreen_on = True
+
+
+def turn_blackscreen_off():
+    global blackscreen_on
+    global blackscreen_frame
+
+    blackscreen_frame.grid_forget()
+    blackscreen_on = False
+
+
+def toggle_blackscreen_on_time():
+    now = datetime.now().time()
+    sleep_from = datetime.strptime(sleep_time_from, "%H:%M").time()
+    sleep_to = datetime.strptime(sleep_time_to, "%H:%M").time()
+
+    if sleep_from < sleep_to:
+        if sleep_from < now < sleep_to:
+            turn_blackscreen_on()
+        else:
+            turn_blackscreen_off()
+    else:
+        if sleep_from < now or sleep_to > now:
+            turn_blackscreen_on()
+        else:
+            turn_blackscreen_off()
+
+
+root.bind("<F12>", toggle_blackscreen)
 
 
 def resize_images():
@@ -149,6 +202,8 @@ unit_two_label.pack()
 
 root.update()
 
+blackscreen_frame = Frame(root, width=1080, height=850, borderwidth=1, relief="solid", bg="black")
+
 
 def one_nineteen_on():
     one_nineteen_frame.config(bg="red")
@@ -239,6 +294,8 @@ def wait(time_in_seconds):
 
 def turn_on_wait_turn_off(one_nineteen, one_forty_two, two_forty_two, three_forty_eight, oil, hose_cart, unit_one,
                           unit_two):
+    turn_blackscreen_off()
+
     if one_nineteen:
         one_nineteen_on()
         root.update()
@@ -305,6 +362,8 @@ def turn_on_wait_turn_off(one_nineteen, one_forty_two, two_forty_two, three_fort
         unit_two_off()
         root.update()
 
+    toggle_blackscreen_on_time()
+
 
 def setDescription(description):
     description_label.config(text=description)
@@ -347,6 +406,8 @@ init()
 
 def alarm(date_time, operation_description, address, one_nineteen, one_forty_two, two_forty_two, three_forty_eight, oil,
           hose_cart, unit_one, unit_two):
+    toggle_blackscreen_on_time()
+
     if datetime.strptime(date_time, "%Y-%m-%d, %H:%M") < datetime.now():
         print(date_time + " < " + str(datetime.now()))
         return
@@ -354,6 +415,8 @@ def alarm(date_time, operation_description, address, one_nineteen, one_forty_two
     while True:
         resize_images()
         root.update()
+
+        toggle_blackscreen_on_time()
 
         if date_time == datetime.now().strftime("%Y-%m-%d, %H:%M"):
             print("Alarm is ringing")
@@ -434,4 +497,5 @@ for i in range(numberOfOperations):
 
 # keep alive
 while True:
+    toggle_blackscreen_on_time()
     root.update()
