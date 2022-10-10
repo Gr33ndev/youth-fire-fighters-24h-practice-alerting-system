@@ -17,6 +17,7 @@ default_address = "Ihr könnt ja Knoten & Stiche üben :-)"
 # --------------------------------------------------------------------------------------------
 
 blackscreen_on = False
+manual_blackscreen_mode = False
 
 root = Tk()
 root.iconbitmap("App_Logo.ico")
@@ -35,6 +36,15 @@ def toggle_fullscreen(event):
 
 
 root.bind("<F11>", toggle_fullscreen)
+
+
+def toggle_manual_blackscreen_mode(event):
+    global manual_blackscreen_mode
+
+    if manual_blackscreen_mode:
+        manual_blackscreen_mode = False
+    else:
+        manual_blackscreen_mode = True
 
 
 def toggle_blackscreen(event):
@@ -64,23 +74,25 @@ def turn_blackscreen_off():
 
 
 def toggle_blackscreen_on_time():
-    now = datetime.now().time()
-    sleep_from = datetime.strptime(sleep_time_from, "%H:%M").time()
-    sleep_to = datetime.strptime(sleep_time_to, "%H:%M").time()
+    if not manual_blackscreen_mode:
+        now = datetime.now().time()
+        sleep_from = datetime.strptime(sleep_time_from, "%H:%M").time()
+        sleep_to = datetime.strptime(sleep_time_to, "%H:%M").time()
 
-    if sleep_from < sleep_to:
-        if sleep_from < now < sleep_to:
-            turn_blackscreen_on()
+        if sleep_from < sleep_to:
+            if sleep_from < now < sleep_to:
+                turn_blackscreen_on()
+            else:
+                turn_blackscreen_off()
         else:
-            turn_blackscreen_off()
-    else:
-        if sleep_from < now or sleep_to > now:
-            turn_blackscreen_on()
-        else:
-            turn_blackscreen_off()
+            if sleep_from < now or sleep_to > now:
+                turn_blackscreen_on()
+            else:
+                turn_blackscreen_off()
 
 
 root.bind("<F12>", toggle_blackscreen)
+root.bind("<F9>", toggle_manual_blackscreen_mode)
 
 
 def resize_images():
