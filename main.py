@@ -6,15 +6,18 @@ from tkinter import *
 import pygame
 from PIL import ImageTk, Image
 
-# ------------------------------------------Settings------------------------------------------
+# ---------------------------------------------Settings---------------------------------------------
 sleep_time_from = "21:00"
 sleep_time_to = "09:00"
+
+blackscreen_activated = False  # should be True if you want to have a black screen on sleep time
 
 turn_on_time_in_seconds = 60  # has to be a multiple of length_of_sound_in_seconds
 length_of_sound_in_seconds = 30
 default_operation_description = "Derzeit kein Alarm"
 default_address = "Ihr könnt ja Knoten & Stiche üben :-)"
-# --------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------
+
 
 blackscreen_on = False
 manual_blackscreen_mode = False
@@ -74,21 +77,22 @@ def turn_blackscreen_off():
 
 
 def toggle_blackscreen_on_time():
-    if not manual_blackscreen_mode:
-        now = datetime.now().time()
-        sleep_from = datetime.strptime(sleep_time_from, "%H:%M").time()
-        sleep_to = datetime.strptime(sleep_time_to, "%H:%M").time()
+    if blackscreen_activated:
+        if not manual_blackscreen_mode:
+            now = datetime.now().time()
+            sleep_from = datetime.strptime(sleep_time_from, "%H:%M").time()
+            sleep_to = datetime.strptime(sleep_time_to, "%H:%M").time()
 
-        if sleep_from < sleep_to:
-            if sleep_from < now < sleep_to:
-                turn_blackscreen_on()
+            if sleep_from < sleep_to:
+                if sleep_from < now < sleep_to:
+                    turn_blackscreen_on()
+                else:
+                    turn_blackscreen_off()
             else:
-                turn_blackscreen_off()
-        else:
-            if sleep_from < now or sleep_to > now:
-                turn_blackscreen_on()
-            else:
-                turn_blackscreen_off()
+                if sleep_from < now or sleep_to > now:
+                    turn_blackscreen_on()
+                else:
+                    turn_blackscreen_off()
 
 
 root.bind("<F12>", toggle_blackscreen)
