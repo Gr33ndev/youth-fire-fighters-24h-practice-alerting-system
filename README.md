@@ -23,6 +23,12 @@ Replace audio.mp3 with an alarm sound and set ``length_of_sound_in_seconds`` in 
 sound file in seconds.  
 Replace JF_Logo.png (2064x779px) with the logo of your own youth fire fighters logo.
 
+## requirements
+
+1. python 3.7.3 -> https://www.python.org/downloads/release/python-373/
+2. pygame -> `pip install pygame`
+3. PIL -> `pip install Pillow`
+
 ## how to use
 
 1. open setup.php and configer all alerts there
