@@ -1,6 +1,6 @@
-# youth-fire-fighters-24h-practise-alerting-system
+# youth-fire-fighters-24h-practice-alerting-system
 
-In this repo a software is provided which is used by the youth fire fighters for the 24 hours practise.
+In this repo a software is provided which is used by the youth fire fighters for the “Professional Firefighters' Day“ (24-hour practice).
 First, a configuration can be created and then the software "alarms" at the specified times to simulate real operations.
 
 ## screenshots
