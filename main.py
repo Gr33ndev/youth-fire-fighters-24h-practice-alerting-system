@@ -141,7 +141,7 @@ Grid.columnconfigure(root, 4, weight=1)
 # Add JF logo
 jf_logo_frame = Frame(root)
 jf_logo_frame.grid(row=0, column=1, columnspan=2, sticky="nsw")
-jf_logo = Image.open("JF_Logo.png")
+jf_logo = Image.open("images/JF_Logo.png")
 jf_logo_resized = jf_logo.resize((206, 78), Image.LANCZOS)
 jf_logo_pic = ImageTk.PhotoImage(jf_logo_resized)
 jf_logo_label = Label(jf_logo_frame, image=jf_logo_pic)
@@ -150,7 +150,7 @@ jf_logo_label.pack(fill=BOTH, expand=YES)
 # Add AS2 logo
 as2_logo_frame = Frame(root)
 as2_logo_frame.grid(row=0, column=3, columnspan=2, sticky="nse")
-as2_logo = Image.open("Alarmierungssystem_2.0_Logo.jpg")
+as2_logo = Image.open("images/Alarmierungssystem_2.0_Logo.jpg")
 as2_logo_resized = as2_logo.resize((263, 78), Image.LANCZOS)
 as2_logo_pic = ImageTk.PhotoImage(as2_logo_resized)
 as2_logo_label = Label(as2_logo_frame, image=as2_logo_pic)
@@ -442,7 +442,7 @@ def alarm(date_time, operation_description, address, one_nineteen, one_forty_two
 
             try:
                 pygame.mixer.init()
-                pygame.mixer.music.load("audio.mp3")
+                pygame.mixer.music.load("sounds/audio.mp3")
                 pygame.mixer.music.play(int(turn_on_time_in_seconds / length_of_sound_in_seconds))
             except:
                 print("Error playing audio")

@@ -243,6 +243,6 @@ if (!empty($_POST)) {
     <?php
 }
 ?>
-    <a class="flex justify-center text-xs mt-4 text-gray-500" href="third-party-license-notices.html">Third Party License Notice</a>
+    <a class="flex justify-center text-xs mt-4 text-gray-500" href="third-party-license-notices/third-party-license-notices.html">Third Party License Notice</a>
 </body>
 </html>

@@ -7,21 +7,21 @@ First, a configuration can be created and then the software "alarms" at the spec
 
 ### setup page:
 
-<img src="alerting_system_setup_page.png" width="800"><br/>
+<img src="images/alerting_system_setup_page.png" width="800"><br/>
 
 ### alerting system in standby:
 
-<img src="alerting_system_standby.png" width="800"><br/>
+<img src="images/alerting_system_standby.png" width="800"><br/>
 
 ### alerting system on alert:
 
-<img src="alerting_system_alerting.png" width="800">
+<img src="images/alerting_system_alerting.png" width="800">
 
 ## setup
 
-Replace audio.mp3 with an alarm sound and set ``length_of_sound_in_seconds`` in line 10 in main.py to the length of the
+Replace /sounds/audio.mp3 with an alarm sound and set ``length_of_sound_in_seconds`` in line 10 in main.py to the length of the
 sound file in seconds.  
-Replace JF_Logo.png (2064x779px) with the logo of your own youth fire fighters logo.
+Replace /images/JF_Logo.png (2064x779px) with the logo of your own youth fire fighters logo.
 
 ## requirements
 
