@@ -7,7 +7,7 @@ First, a configuration can be created and then the software "alarms" at the spec
 
 ### setup page:
 
-<img src="alerting_system_setup_page.png" width="200"><br/>
+<img src="alerting_system_setup_page.png" width="800"><br/>
 
 ### alerting system in standby:
 
