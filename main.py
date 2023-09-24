@@ -23,7 +23,7 @@ blackscreen_on = False
 manual_blackscreen_mode = False
 
 root = Tk()
-root.iconbitmap("App_Logo.ico")
+root.iconbitmap("images/App_Logo.ico")
 root.title("Youth Fire Fighters 24h Practise Alerting System by Gilian Rehm")
 root.geometry("1080x850")
 root.grid()
@@ -510,6 +510,10 @@ for i in range(numberOfOperations):
               sorted_config_data[i]["1-19"], sorted_config_data[i]["1-42"], sorted_config_data[i]["2-42"],
               sorted_config_data[i]["3-48"], sorted_config_data[i]["oil"], sorted_config_data[i]["hoseCart"],
               sorted_config_data[i]["unitOne"], sorted_config_data[i]["unitTwo"])
+
+    if i == numberOfOperations:
+        set_alarm("keep alive", "keep alive", "3000-01-01", "11:11", "false", "false", "false", "false", "false",
+                  "false", "false", "false")
 
 # keep alive
 while True:
