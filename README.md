@@ -1,61 +1,50 @@
 # youth-fire-fighters-24h-practice-alerting-system
 
-In this repo a software is provided which is used by the youth fire fighters for the “Professional Firefighters' Day“ (24-hour practice).
-First, a configuration can be created and then the software "alarms" at the specified times to simulate real operations.
+Browser-based alarm simulator for the youth fire fighters' "Tag der Berufsfeuerwehr" (24-hour practice day).
+Configure scheduled "operations" (Einsätze), then the system alarms automatically at each set time — sound, indicator lights, address, map.
 
-## screenshots
+## Run
 
-### setup page:
+Double-click `index.html`. That's it. No install, no server.
 
-<img src="images/alerting_system_setup_page.png" width="800"><br/>
+Works in any modern browser (Chrome, Edge, Firefox, Safari). Recommended: open in fullscreen (`F11`) on the laptop running the practice. Keep the tab in foreground — background tabs throttle timers and may delay alarms.
 
-### alerting system in standby:
+**Offline behavior:** the alarm core (sound, indicators, description, address) works fully offline. The map is the only online-dependent feature — it uses Leaflet + OpenStreetMap loaded from a CDN. If the CDN or tile server can't be reached, the map silently falls back to a placeholder icon; the alarm itself is unaffected. For guaranteed offline use, run the page once while online so the browser caches Leaflet.
 
-<img src="images/alerting_system_standby.png" width="800"><br/>
+## Setup
 
-### alerting system on alert:
+1. Open `index.html` — opens directly in the setup view.
+2. Add operations with description, address, date, time, and which vehicles/units are alarmed.
+3. Adjust **Einstellungen** if needed (sleep window, alarm duration, default texts, alarm options). Enable **Automatischer Blackscreen während Schlafzeit** if you want the screen to dim automatically during the configured sleep window.
+4. Click **Alarmierung starten →** to switch to the live display.
+5. Click **System starten** once (browser audio gate).
 
-<img src="images/alerting_system_alerting.png" width="800">
+Config persists in browser `localStorage`. Use **Export JSON** / **Import JSON** to back up or transfer between machines. The Import button also accepts the legacy `config.json` array format from the old PHP setup.
 
-## setup
+## Required assets
 
-Replace /sounds/audio.mp3 with an alarm sound and set ``length_of_sound_in_seconds`` in line 10 in main.py to the length of the
-sound file in seconds.  
-Replace /images/JF_Logo.png (2064x779px) with the logo of your own youth fire fighters logo.
+Replace these with your own:
 
-## requirements
+- `sounds/audio.mp3` — alarm sound (looped during alarm)
+- `images/JF_Logo.png` — your youth fire fighter logo
 
-1. python 3.7.3 -> https://www.python.org/downloads/release/python-373/
-2. pygame -> `pip install pygame`
-3. PIL -> `pip install Pillow`
+## Keyboard shortcuts (display view)
 
-## how to use
+| Key   | Action                                  |
+|-------|-----------------------------------------|
+| `F11` | Toggle fullscreen                       |
+| `F12` | Force blackscreen on/off                |
+| `F9`  | Disable automatic sleep-time blackscreen|
+| `Esc` | Back to setup                           |
 
-1. open setup.php and configer all alerts there
-2. start main.py
+## Alarm options (indicators)
 
-## structure of config.json
+Defaults: `1-19`, `1-42`, `2-42`, `3-48`, `ÖL-A`, `SW-A`, `Zug 1`, `Zug 2`. Fully editable under **Einstellungen → Alarmoptionen**: add, rename, reorder, or remove. Each operation can light any combination.
 
-```json
-[
-  {
-    "numberOfOperations": int
-  },
-  {
-    "operationNumber": int,
-    "operationDescription": string,
-    "address": string,
-    "operationDate": date
-    "operationTime": time,
-    "1-19": boolean,
-    "1-42": boolean,
-    "2-42": boolean,
-    "3-48": boolean,
-    "oil": boolean,
-    "hoseCart": boolean,
-    "unitOne": boolean,
-    "unitTwo": boolean
-  },
-  ...
-]
-```
+## Credits
+
+Map: [Leaflet](https://leafletjs.com/) + [OpenStreetMap](https://www.openstreetmap.org/copyright). Geocoding: [Nominatim](https://nominatim.openstreetmap.org/).
+
+## License
+
+See [LICENSE](LICENSE).

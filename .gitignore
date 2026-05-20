@@ -1,5 +1,4 @@
 sounds/audio.mp3
-config.json
 images/JF_Logo.png
 /.idea/
-/venv/
+.DS_Store
