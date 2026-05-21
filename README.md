@@ -21,12 +21,12 @@ Works in any modern browser (Chrome, Edge, Firefox, Safari). Recommended: open i
 
 Config persists in browser `localStorage`. Use **Export JSON** / **Import JSON** to back up or transfer between machines. The Import button also accepts the legacy `config.json` array format from the old PHP setup.
 
-## Required assets
+## Assets
 
-Replace these with your own:
+Bundled, ready to use:
 
-- `sounds/audio.mp3` — alarm sound (looped during alarm)
-- `images/JF_Logo.png` — your youth fire fighter logo
+- `sounds/audio.wav` — default alarm sound (looped during alarm). Optional: replace with any browser-supported audio file. Keep the filename or update the `<audio>` src in `index.html`.
+- `images/JF_Logo.png` — default logo. Optional: replace with your own youth fire fighter logo.
 
 ## Keyboard shortcuts (display view)
 
@@ -44,6 +44,8 @@ Defaults: `1-19`, `1-42`, `2-42`, `3-48`, `ÖL-A`, `SW-A`, `Zug 1`, `Zug 2`. Ful
 ## Credits
 
 Map: [Leaflet](https://leafletjs.com/) + [OpenStreetMap](https://www.openstreetmap.org/copyright). Geocoding: [Nominatim](https://nominatim.openstreetmap.org/).
+
+Sound: [Martinshorn (Siren) 2](https://freesound.org/people/TitanKaempfer/sounds/811916/) by [TitanKaempfer](https://freesound.org/people/TitanKaempfer/), released under [Creative Commons 0](http://creativecommons.org/publicdomain/zero/1.0/).
 
 ## License
 
