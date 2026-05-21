@@ -158,6 +158,44 @@
   .modal { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 24px; max-width: 480px; width: 92%; }
   .modal h2 { margin: 0 0 16px; font-size: 20px; }
   .modal .actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1000px) {
+    #display-view { grid-template-columns: 1fr; }
+    .side-panel { min-height: 220px; max-height: 32vh; }
+    .desc-panel .desc { font-size: 32px; }
+    .addr-panel .addr { font-size: 22px; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .setup-header { flex-wrap: wrap; gap: 12px; }
+    .setup-header .actions { flex-wrap: wrap; }
+  }
+  @media (max-width: 700px) {
+    body, html { overflow: auto; }
+    #display-view { padding: 8px; gap: 8px; height: auto; min-height: 100vh; }
+    .top-bar { flex-wrap: wrap; gap: 8px; padding: 4px 8px; justify-content: center; }
+    .top-bar .logo img { max-height: 40px; }
+    .top-bar .title { font-size: 14px; }
+    .top-bar .clock { font-size: 20px; }
+    .desc-panel { padding: 16px; min-height: 70px; }
+    .desc-panel .desc { font-size: 22px; }
+    .addr-panel { padding: 12px; min-height: 50px; }
+    .addr-panel .addr { font-size: 16px; }
+    .indicator { font-size: 22px; min-height: 60px; }
+    .side-panel { min-height: 200px; max-height: 40vh; }
+    .status-bar { flex-direction: column; gap: 4px; font-size: 11px; text-align: center; padding: 6px 8px; }
+    .status-bar .right { flex-wrap: wrap; justify-content: center; gap: 10px; }
+    #setup-view { padding: 16px 12px 120px; }
+    .setup-header h1 { font-size: 22px; }
+    .toolbar { left: 8px; right: 8px; transform: none; flex-wrap: wrap; justify-content: center; bottom: 8px; }
+    .card { padding: 14px; }
+    .modal { padding: 16px; max-height: 95vh; }
+  }
+  @media (max-width: 420px) {
+    .top-bar .title { display: none; }
+    .desc-panel .desc { font-size: 18px; }
+    .indicator { font-size: 18px; }
+    button { padding: 8px 12px; font-size: 13px; }
+  }
 </style>
 </head>
 <body>
@@ -291,6 +329,7 @@ let runtime = {
   firedAt: {},           // opId -> ISO of scheduled dt when fired; mismatch on edit re-arms op
   map: null,
   marker: null,
+  abortStep: null,       // resolves the in-flight alarm sequence step (audio or speech)
 };
 
 const STALE_MS = 10_000; // op past this far is considered missed — don't fire
@@ -656,7 +695,8 @@ function buildDisplayUI() {
     wrap.style.display = "none";
   } else {
     wrap.style.display = "grid";
-    const cols = Math.min(inds.length, 4);
+    const cap = window.innerWidth < 700 ? 2 : 4;
+    const cols = Math.min(inds.length, cap);
     wrap.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
     wrap.innerHTML = inds.map(ind =>
       `<div class="indicator" data-key="${ind.key}">${escapeAttr(ind.label)}</div>`
@@ -749,14 +789,56 @@ function triggerAlarm(op) {
   });
   if (op.address) showMap(op.address); else showPlaceholder();
 
-  // sound
-  const audio = document.getElementById("alarm-audio");
-  audio.loop = true;
-  audio.currentTime = 0;
-  audio.play().catch(e => console.warn("audio play failed", e));
-
+  // siren + TTS sequence
   if (runtime.alarmTimeoutId) clearTimeout(runtime.alarmTimeoutId);
   runtime.alarmTimeoutId = setTimeout(endAlarm, state.settings.alarmDurationSec * 1000);
+  runAlarmSequence(op, Date.now() + state.settings.alarmDurationSec * 1000);
+}
+
+function buildSpeechText(op) {
+  const parts = [];
+  if (op.description) parts.push(op.description);
+  if (op.address) parts.push("Einsatzort: " + op.address);
+  const on = indicators().filter(ind => op.indicators[ind.key]).map(ind => ind.label);
+  if (on.length) parts.push("Alarmiert: " + on.join(", "));
+  return parts.join(". ");
+}
+
+function playAudioOnce() {
+  return new Promise(resolve => {
+    const audio = document.getElementById("alarm-audio");
+    audio.loop = false;
+    audio.currentTime = 0;
+    const cleanup = () => { audio.removeEventListener("ended", onEnd); runtime.abortStep = null; resolve(); };
+    const onEnd = cleanup;
+    audio.addEventListener("ended", onEnd);
+    runtime.abortStep = cleanup;
+    audio.play().catch(e => { console.warn("audio play failed", e); cleanup(); });
+  });
+}
+
+function speak(text) {
+  return new Promise(resolve => {
+    if (!("speechSynthesis" in window) || !text) { resolve(); return; }
+    try { speechSynthesis.cancel(); } catch {}
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "de-DE";
+    u.rate = 0.95;
+    const cleanup = () => { runtime.abortStep = null; resolve(); };
+    u.onend = cleanup;
+    u.onerror = cleanup;
+    runtime.abortStep = cleanup;
+    try { speechSynthesis.speak(u); } catch (e) { console.warn("speech failed", e); cleanup(); }
+  });
+}
+
+async function runAlarmSequence(op, endTime) {
+  const text = buildSpeechText(op);
+  while (runtime.alarmActive && Date.now() < endTime) {
+    await playAudioOnce();
+    if (!runtime.alarmActive || Date.now() >= endTime) break;
+    if (text) await speak(text);
+  }
 }
 
 function endAlarm() {
@@ -766,6 +848,8 @@ function endAlarm() {
   audio.pause();
   audio.loop = false;
   audio.currentTime = 0;
+  try { speechSynthesis.cancel(); } catch {}
+  if (runtime.abortStep) { const a = runtime.abortStep; runtime.abortStep = null; a(); }
   if (runtime.view === "display") {
     setDefaults();
     applyBlackscreen();
@@ -827,6 +911,23 @@ document.addEventListener("keydown", e => {
   } else if (e.key === "Escape") {
     goSetup();
   }
+});
+
+// ---------------- Responsive rebuild ----------------
+let resizeTimer = null;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if (runtime.view === "display") {
+      const wrap = document.getElementById("indicators");
+      const inds = indicators();
+      if (inds.length > 0) {
+        const cap = window.innerWidth < 700 ? 2 : 4;
+        wrap.style.gridTemplateColumns = `repeat(${Math.min(inds.length, cap)}, 1fr)`;
+      }
+    }
+    if (runtime.map) { try { runtime.map.invalidateSize(); } catch {} }
+  }, 150);
 });
 
 // ---------------- Boot ----------------

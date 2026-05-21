@@ -1,7 +1,7 @@
 # youth-fire-fighters-24h-practice-alerting-system
 
 Browser-based alarm simulator for the youth fire fighters' "Tag der Berufsfeuerwehr" (24-hour practice day).
-Configure scheduled "operations" (Einsätze), then the system alarms automatically at each set time — sound, indicator lights, address, map.
+Configure scheduled "operations" (Einsätze), then the system alarms automatically at each set time — siren sound, indicator lights, address, map, and spoken announcement (text-to-speech in German).
 
 ## Run
 
@@ -10,6 +10,8 @@ Double-click `index.html`. That's it. No install, no server.
 Works in any modern browser (Chrome, Edge, Firefox, Safari). Recommended: open in fullscreen (`F11`) on the laptop running the practice. Keep the tab in foreground — background tabs throttle timers and may delay alarms.
 
 **Offline behavior:** the alarm core (sound, indicators, description, address) works fully offline. The map is the only online-dependent feature — it uses Leaflet + OpenStreetMap loaded from a CDN. If the CDN or tile server can't be reached, the map silently falls back to a placeholder icon; the alarm itself is unaffected. For guaranteed offline use, run the page once while online so the browser caches Leaflet.
+
+**Text-to-speech:** during an alarm, the system speaks the Stichwort (description), Einsatzort (address) and which units are alarmed, interleaved with the siren (siren → speech → siren → ...). Uses the browser's built-in Web Speech API with a German voice. Works fully offline on macOS, Windows, and most Chrome/Edge installs. On Linux/Firefox a German voice may need to be installed separately.
 
 ## Setup
 
