@@ -11,7 +11,7 @@ Works in any modern browser (Chrome, Edge, Firefox, Safari). Recommended: open i
 
 **Offline behavior:** the alarm core (sound, indicators, description, address) works fully offline. The map is the only online-dependent feature — it uses Leaflet + OpenStreetMap loaded from a CDN. If the CDN or tile server can't be reached, the map silently falls back to a placeholder icon; the alarm itself is unaffected. For guaranteed offline use, run the page once while online so the browser caches Leaflet.
 
-**Text-to-speech:** during an alarm, the system speaks the Stichwort (description), Einsatzort (address) and which units are alarmed, interleaved with the siren (siren → speech → siren → ...). Uses the browser's built-in Web Speech API with a German voice. Works fully offline on macOS, Windows, and most Chrome/Edge installs. On Linux/Firefox a German voice may need to be installed separately.
+**Text-to-speech:** during an alarm, the system speaks the alarmed vehicles, Stichwort and Einsatzort in German (e.g. *"Einsatz für 1/42 und 2/42, B3 - Gebäudebrand, Mustergasse 1 Stuttgart."*). Choose under **Einstellungen → Alarmierungsart** whether to play siren only, speech only, or both alternating. Uses the browser's built-in Web Speech API. Works fully offline on macOS, Windows, and most Chrome/Edge installs. On Linux/Firefox a German voice may need to be installed separately.
 
 ## Setup
 
