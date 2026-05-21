@@ -308,6 +308,7 @@ const DEFAULTS = {
   defaultDescription: "Derzeit kein Alarm",
   defaultAddress: "Ihr könnt ja Knoten & Stiche üben :-)",
   indicators: DEFAULT_INDICATORS,
+  alarmMode: "both", // "sound" | "speech" | "both"
 };
 
 function indicators() {
@@ -517,6 +518,14 @@ function openSettings() {
         <input type="number" id="set-alarm-dur" value="${s.alarmDurationSec}" min="5" max="600">
       </div>
       <div style="margin-top:14px;">
+        <label>Alarmierungsart</label>
+        <select id="set-alarm-mode">
+          <option value="both" ${s.alarmMode === "both" ? "selected" : ""}>Sirene + Sprachausgabe (abwechselnd)</option>
+          <option value="sound" ${s.alarmMode === "sound" ? "selected" : ""}>Nur Sirene</option>
+          <option value="speech" ${s.alarmMode === "speech" ? "selected" : ""}>Nur Sprachausgabe</option>
+        </select>
+      </div>
+      <div style="margin-top:14px;">
         <label>Standard-Beschreibung (Bereitschaft)</label>
         <input type="text" id="set-default-desc" value="${escapeAttr(s.defaultDescription)}">
       </div>
@@ -583,6 +592,7 @@ function saveSettings() {
     defaultDescription: document.getElementById("set-default-desc").value || DEFAULTS.defaultDescription,
     defaultAddress: document.getElementById("set-default-addr").value || DEFAULTS.defaultAddress,
     indicators: settingsDraftIndicators.filter(i => i.label.trim() !== ""),
+    alarmMode: document.getElementById("set-alarm-mode").value || DEFAULTS.alarmMode,
   };
   // prune removed indicators from operations
   const validKeys = new Set(state.settings.indicators.map(i => i.key));
@@ -795,13 +805,20 @@ function triggerAlarm(op) {
   runAlarmSequence(op, Date.now() + state.settings.alarmDurationSec * 1000);
 }
 
+function joinAnd(items) {
+  if (items.length === 0) return "";
+  if (items.length === 1) return items[0];
+  if (items.length === 2) return items[0] + " und " + items[1];
+  return items.slice(0, -1).join(", ") + " und " + items[items.length - 1];
+}
+
 function buildSpeechText(op) {
-  const parts = [];
-  if (op.description) parts.push(op.description);
-  if (op.address) parts.push("Einsatzort: " + op.address);
   const on = indicators().filter(ind => op.indicators[ind.key]).map(ind => ind.label);
-  if (on.length) parts.push("Alarmiert: " + on.join(", "));
-  return parts.join(". ");
+  const lead = on.length ? "Einsatz für " + joinAnd(on) : "Einsatz";
+  const parts = [lead];
+  if (op.description) parts.push(op.description);
+  if (op.address) parts.push(op.address);
+  return parts.join(", ") + ".";
 }
 
 function playAudioOnce() {
@@ -832,12 +849,26 @@ function speak(text) {
   });
 }
 
+function wait(ms) {
+  return new Promise(resolve => {
+    const id = setTimeout(() => { runtime.abortStep = null; resolve(); }, ms);
+    runtime.abortStep = () => { clearTimeout(id); resolve(); };
+  });
+}
+
 async function runAlarmSequence(op, endTime) {
   const text = buildSpeechText(op);
+  const mode = state.settings.alarmMode || "both";
   while (runtime.alarmActive && Date.now() < endTime) {
-    await playAudioOnce();
-    if (!runtime.alarmActive || Date.now() >= endTime) break;
-    if (text) await speak(text);
+    if (mode === "sound" || mode === "both") {
+      await playAudioOnce();
+      if (!runtime.alarmActive || Date.now() >= endTime) break;
+    }
+    if ((mode === "speech" || mode === "both") && text) {
+      await speak(text);
+      if (!runtime.alarmActive || Date.now() >= endTime) break;
+      if (mode === "speech") await wait(800); // small gap between repeats
+    }
   }
 }
 
