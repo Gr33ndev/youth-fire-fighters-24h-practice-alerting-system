@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Alarmierungssystem 2.0</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="images/App_Logo.ico">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<style>
+  :root {
+    --bg: #0b0e13;
+    --panel: #151a22;
+    --panel-2: #1d2330;
+    --border: #2a3142;
+    --text: #e8ecf1;
+    --muted: #8a93a6;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --alarm: #dc2626;
+    --alarm-glow: #ef4444;
+    --ok: #16a34a;
+    --warn: #eab308;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    overflow: hidden;
+  }
+  body.scroll { overflow: auto; }
+  button {
+    font-family: inherit; cursor: pointer; border: none; border-radius: 8px;
+    padding: 10px 16px; font-size: 14px; font-weight: 500;
+    background: var(--panel-2); color: var(--text);
+    border: 1px solid var(--border); transition: all .15s;
+  }
+  button:hover { background: var(--border); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary:hover { background: var(--accent-hover); }
+  button.danger { background: transparent; color: #ef4444; border-color: #3a2030; }
+  button.danger:hover { background: #2a1820; }
+  input, select {
+    font-family: inherit; font-size: 14px; padding: 10px 12px;
+    background: var(--panel-2); color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px; width: 100%;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--accent); }
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .04em; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ---------- Setup view ---------- */
+  #setup-view { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+  .setup-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+  .setup-header h1 { font-size: 28px; margin: 0; }
+  .setup-header .actions { display: flex; gap: 10px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .card-head h2 { font-size: 16px; margin: 0; color: var(--muted); font-weight: 600; }
+  .grid { display: grid; gap: 14px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 999px; font-size: 13px;
+    background: var(--panel-2); border: 1px solid var(--border); cursor: pointer;
+    user-select: none;
+  }
+  .chip input { display: none; }
+  .chip.on { background: rgba(220, 38, 38, .15); border-color: var(--alarm); color: #fca5a5; }
+  .op-num { font-size: 13px; color: var(--muted); }
+  .row-actions { display: flex; gap: 6px; }
+  .icon-btn { padding: 6px 10px; font-size: 12px; }
+  .toolbar {
+    position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 10px 14px; display: flex; gap: 10px; z-index: 50;
+    box-shadow: 0 10px 30px rgba(0,0,0,.4);
+  }
+  .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+
+  /* ---------- Display view ---------- */
+  #display-view { height: 100vh; display: grid;
+    grid-template-columns: 1fr 420px;
+    grid-template-rows: auto 1fr auto;
+    gap: 12px; padding: 12px;
+  }
+  .top-bar { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 4px 12px; }
+  .top-bar .logo { height: 56px; display: flex; align-items: center; gap: 12px; }
+  .top-bar .logo img { height: 100%; max-height: 56px; }
+  .top-bar .title { font-size: 20px; font-weight: 600; color: var(--muted); letter-spacing: .04em; }
+  .top-bar .clock { font-size: 28px; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .main-panel { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .desc-panel, .addr-panel {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 28px 32px; text-align: center;
+  }
+  .desc-panel { min-height: 110px; display: flex; align-items: center; justify-content: center; }
+  .desc-panel .desc { font-size: 42px; font-weight: 700; line-height: 1.15; }
+  .addr-panel { min-height: 80px; display: flex; align-items: center; justify-content: center; }
+  .addr-panel .addr { font-size: 28px; color: var(--text); }
+  .indicators { display: grid; gap: 12px; flex: 1; grid-auto-rows: 1fr; }
+  .indicator {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px; font-weight: 700; transition: all .2s;
+    min-height: 90px;
+  }
+  .indicator.on {
+    background: var(--alarm); border-color: var(--alarm-glow); color: #fff;
+    box-shadow: 0 0 24px rgba(239, 68, 68, .5);
+  }
+  .side-panel { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+  .map-card {
+    flex: 1; background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    overflow: hidden; display: flex; flex-direction: column; min-height: 0;
+  }
+  .map-head { padding: 12px 16px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  #map { flex: 1; background: var(--panel-2); }
+  .map-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 12px; color: var(--muted); padding: 20px; text-align: center; }
+  .map-placeholder .fire { font-size: 64px; }
+
+  .status-bar { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; padding: 6px 14px; color: var(--muted); font-size: 13px; }
+  .status-bar .right { display: flex; gap: 18px; align-items: center; }
+  .status-bar kbd {
+    background: var(--panel-2); border: 1px solid var(--border); border-bottom-width: 2px;
+    border-radius: 4px; padding: 1px 6px; font-size: 11px; font-family: ui-monospace, monospace;
+  }
+
+  body.alarm .desc-panel, body.alarm .addr-panel {
+    border-color: var(--alarm); background: rgba(220, 38, 38, .08);
+  }
+  body.alarm .desc-panel .desc { color: #fff; }
+  body.alarm .addr-panel .addr { color: #fff; }
+  body.alarm .top-bar .title::before { content: "ALARM • "; color: var(--alarm-glow); animation: blink 1s steps(2, end) infinite; }
+
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* black screen */
+  body.blackscreen #display-view { visibility: hidden; }
+  body.blackscreen { background: #000; }
+
+  /* gate (audio unlock) */
+  .gate {
+    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(11, 14, 19, .96); z-index: 100;
+  }
+  .gate-card { text-align: center; padding: 40px; max-width: 480px; }
+  .gate-card h2 { margin: 0 0 12px; font-size: 24px; }
+  .gate-card p { color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
+  .gate-card button { padding: 14px 28px; font-size: 16px; }
+
+  /* settings modal */
+  .modal-back { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 60; }
+  .modal { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 24px; max-width: 480px; width: 92%; }
+  .modal h2 { margin: 0 0 16px; font-size: 20px; }
+  .modal .actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<!-- ============== SETUP VIEW ============== -->
+<div id="setup-view" style="display: none;">
+  <div class="setup-header">
+    <h1>Einsätze konfigurieren</h1>
+    <div class="actions">
+      <button onclick="openSettings()">Einstellungen</button>
+      <button onclick="exportConfig()">Export JSON</button>
+      <button onclick="document.getElementById('import-file').click()">Import JSON</button>
+      <input type="file" id="import-file" accept="application/json" style="display:none" onchange="importConfig(event)">
+      <button class="primary" onclick="goDisplay()">Alarmierung starten →</button>
+    </div>
+  </div>
+
+  <div id="ops-list"></div>
+
+  <div class="toolbar">
+    <button onclick="addOperation()">+ Einsatz hinzufügen</button>
+    <button onclick="saveConfig(true)">Speichern</button>
+    <button class="danger" onclick="clearAll()">Alle löschen</button>
+  </div>
+</div>
+
+<!-- ============== DISPLAY VIEW ============== -->
+<div id="display-view" style="display: none;">
+  <div class="top-bar">
+    <div class="logo"><img id="logo-img" src="images/JF_Logo.png" alt="JF Logo"></div>
+    <div class="title" id="status-title">Bereitschaft</div>
+    <div class="clock" id="clock">--:--:--</div>
+  </div>
+
+  <div class="main-panel">
+    <div class="desc-panel"><div class="desc" id="desc-text">Derzeit kein Alarm</div></div>
+    <div class="addr-panel"><div class="addr" id="addr-text">Ihr könnt ja Knoten & Stiche üben :-)</div></div>
+    <div class="indicators" id="indicators"></div>
+  </div>
+
+  <div class="side-panel">
+    <div class="map-card">
+      <div class="map-head" id="map-head">Einsatzort</div>
+      <div id="map-placeholder" class="map-placeholder">
+        <div class="fire">🚒</div>
+        <div>Kein aktueller Einsatz</div>
+      </div>
+      <div id="map" style="display: none;"></div>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div></div>
+    <div class="right">
+      <span><kbd>F11</kbd> Vollbild</span>
+      <span><kbd>F12</kbd> Blackscreen</span>
+      <span><kbd>Esc</kbd> Setup</span>
+    </div>
+  </div>
+</div>
+
+<!-- audio unlock gate -->
+<div id="gate" class="gate" style="display: none;">
+  <div class="gate-card card">
+    <h2>Alarmierung bereit</h2>
+    <p>Browser benötigt einmal Klick um Audio freizugeben. Danach läuft das System automatisch.</p>
+    <button class="primary" onclick="unlockAndStart()">System starten</button>
+  </div>
+</div>
+
+<audio id="alarm-audio" src="sounds/audio.mp3" preload="auto"></audio>
+
+<script async src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""
+        onerror="window.__leafletFailed=true;console.warn('Leaflet failed to load — map disabled')"></script>
+<script>
+// ---------------- State ----------------
+const DEFAULT_INDICATORS = [
+  { key: "1-19",     label: "1-19"  },
+  { key: "1-42",     label: "1-42"  },
+  { key: "2-42",     label: "2-42"  },
+  { key: "3-48",     label: "3-48"  },
+  { key: "oil",      label: "ÖL-A"  },
+  { key: "hoseCart", label: "SW-A"  },
+  { key: "unitOne",  label: "Zug 1" },
+  { key: "unitTwo",  label: "Zug 2" },
+];
+
+const DEFAULTS = {
+  sleepFrom: "21:00",
+  sleepTo: "09:00",
+  blackscreenAuto: false,
+  alarmDurationSec: 60,
+  defaultDescription: "Derzeit kein Alarm",
+  defaultAddress: "Ihr könnt ja Knoten & Stiche üben :-)",
+  indicators: DEFAULT_INDICATORS,
+};
+
+function indicators() {
+  return state.settings.indicators || [];
+}
+
+let state = {
+  operations: [],
+  settings: { ...DEFAULTS },
+};
+
+let runtime = {
+  view: "setup",         // setup | display
+  alarmActive: false,
+  alarmTimeoutId: null,
+  audioUnlocked: false,
+  manualBlack: false,
+  forceBlack: false,
+  firedAt: {},           // opId -> ISO of scheduled dt when fired; mismatch on edit re-arms op
+  map: null,
+  marker: null,
+};
+
+const STALE_MS = 10_000; // op past this far is considered missed — don't fire
+
+// ---------------- Persistence ----------------
+function load() {
+  try {
+    const raw = localStorage.getItem("alarmConfig");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      state.operations = parsed.operations || [];
+      state.settings = { ...DEFAULTS, ...(parsed.settings || {}) };
+    }
+  } catch (e) { console.error("load failed", e); }
+  // legacy import — try to read old config.json shape from URL ?legacy=1
+  // (skipped — user has new tool)
+}
+
+function save() {
+  localStorage.setItem("alarmConfig", JSON.stringify({
+    operations: state.operations,
+    settings: state.settings,
+  }));
+}
+
+function saveConfig(notify) {
+  save();
+  if (notify) flashToast("Gespeichert");
+}
+
+function flashToast(msg) {
+  const t = document.createElement("div");
+  t.textContent = msg;
+  t.style.cssText = "position:fixed;top:20px;right:20px;background:var(--ok);color:#fff;padding:10px 16px;border-radius:8px;z-index:200;box-shadow:0 6px 20px rgba(0,0,0,.3);";
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 1800);
+}
+
+// ---------------- Setup view ----------------
+function newOperation() {
+  const id = crypto.randomUUID();
+  const now = new Date();
+  const date = now.toISOString().slice(0, 10);
+  const time = now.toTimeString().slice(0, 5);
+  const inds = {};
+  indicators().forEach(i => inds[i.key] = false);
+  return {
+    id,
+    description: "",
+    address: "",
+    date,
+    time,
+    indicators: inds,
+  };
+}
+
+function addOperation() {
+  state.operations.push(newOperation());
+  save();
+  renderSetup();
+  // scroll to bottom
+  setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }), 50);
+}
+
+function removeOperation(id) {
+  state.operations = state.operations.filter(o => o.id !== id);
+  save();
+  renderSetup();
+}
+
+function moveOperation(id, dir) {
+  const idx = state.operations.findIndex(o => o.id === id);
+  const j = idx + dir;
+  if (j < 0 || j >= state.operations.length) return;
+  [state.operations[idx], state.operations[j]] = [state.operations[j], state.operations[idx]];
+  save();
+  renderSetup();
+}
+
+function clearAll() {
+  if (!confirm("Wirklich alle Einsätze löschen?")) return;
+  state.operations = [];
+  save();
+  renderSetup();
+}
+
+function escapeAttr(s) { return String(s ?? "").replace(/"/g, "&quot;"); }
+
+function renderSetup() {
+  const list = document.getElementById("ops-list");
+  if (state.operations.length === 0) {
+    list.innerHTML = `<div class="empty card">
+      <p>Noch keine Einsätze angelegt.</p>
+      <button class="primary" onclick="addOperation()">+ Ersten Einsatz hinzufügen</button>
+    </div>`;
+    return;
+  }
+  // sort by datetime for display, but keep array order? — sort on save instead.
+  const sorted = [...state.operations].sort((a, b) =>
+    (a.date + " " + a.time).localeCompare(b.date + " " + b.time));
+  list.innerHTML = sorted.map((op, i) => renderOpCard(op, i + 1)).join("");
+}
+
+function renderOpCard(op, num) {
+  return `
+  <div class="card" data-id="${op.id}">
+    <div class="card-head">
+      <h2><span class="op-num">Einsatz ${num}</span></h2>
+      <div class="row-actions">
+        <button class="icon-btn" onclick="moveOperation('${op.id}', -1)" title="Hoch">↑</button>
+        <button class="icon-btn" onclick="moveOperation('${op.id}', 1)" title="Runter">↓</button>
+        <button class="icon-btn danger" onclick="removeOperation('${op.id}')">Löschen</button>
+      </div>
+    </div>
+    <div class="grid grid-2">
+      <div>
+        <label>Einsatzbeschreibung</label>
+        <input type="text" value="${escapeAttr(op.description)}" oninput="updateOp('${op.id}','description',this.value)" placeholder="z.B. Brand in Wohnhaus">
+      </div>
+      <div>
+        <label>Adresse</label>
+        <input type="text" value="${escapeAttr(op.address)}" oninput="updateOp('${op.id}','address',this.value)" placeholder="Straße Hausnr, PLZ Ort">
+      </div>
+      <div>
+        <label>Datum</label>
+        <input type="date" value="${escapeAttr(op.date)}" oninput="updateOp('${op.id}','date',this.value)">
+      </div>
+      <div>
+        <label>Uhrzeit</label>
+        <input type="time" value="${escapeAttr(op.time)}" oninput="updateOp('${op.id}','time',this.value)">
+      </div>
+    </div>
+    <div style="margin-top: 16px;">
+      <label>Alarmierte Fahrzeuge / Züge</label>
+      <div class="chips">
+        ${indicators().length === 0
+          ? '<span style="color:var(--muted);font-size:13px;">Keine Alarmoptionen konfiguriert — in Einstellungen anlegen.</span>'
+          : indicators().map(ind => `
+          <label class="chip ${op.indicators[ind.key] ? "on" : ""}" onclick="toggleIndicator(event, '${op.id}', '${ind.key}')">
+            <input type="checkbox" ${op.indicators[ind.key] ? "checked" : ""}>
+            ${escapeAttr(ind.label)}
+          </label>
+        `).join("")}
+      </div>
+    </div>
+  </div>`;
+}
+
+function updateOp(id, field, value) {
+  const op = state.operations.find(o => o.id === id);
+  if (!op) return;
+  op[field] = value;
+  save();
+}
+
+function toggleIndicator(ev, id, key) {
+  ev.preventDefault();
+  const op = state.operations.find(o => o.id === id);
+  if (!op) return;
+  op.indicators[key] = !op.indicators[key];
+  save();
+  renderSetup();
+}
+
+// ---------------- Settings modal ----------------
+let settingsDraftIndicators = [];
+
+function openSettings() {
+  const s = state.settings;
+  settingsDraftIndicators = indicators().map(i => ({ ...i }));
+  const back = document.createElement("div");
+  back.className = "modal-back";
+  back.innerHTML = `
+    <div class="modal" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+      <h2>Einstellungen</h2>
+      <div class="grid grid-2">
+        <div><label>Schlafzeit von</label><input type="time" id="set-sleep-from" value="${s.sleepFrom}"></div>
+        <div><label>Schlafzeit bis</label><input type="time" id="set-sleep-to" value="${s.sleepTo}"></div>
+      </div>
+      <div style="margin-top:14px;">
+        <label><input type="checkbox" id="set-black-auto" ${s.blackscreenAuto ? "checked" : ""}> Automatischer Blackscreen während Schlafzeit</label>
+      </div>
+      <div style="margin-top:14px;">
+        <label>Alarmdauer (Sekunden)</label>
+        <input type="number" id="set-alarm-dur" value="${s.alarmDurationSec}" min="5" max="600">
+      </div>
+      <div style="margin-top:14px;">
+        <label>Standard-Beschreibung (Bereitschaft)</label>
+        <input type="text" id="set-default-desc" value="${escapeAttr(s.defaultDescription)}">
+      </div>
+      <div style="margin-top:14px;">
+        <label>Standard-Adresse (Bereitschaft)</label>
+        <input type="text" id="set-default-addr" value="${escapeAttr(s.defaultAddress)}">
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:20px 0;">
+      <label>Alarmoptionen (Fahrzeuge / Züge)</label>
+      <div id="ind-editor"></div>
+      <button onclick="addDraftIndicator()" style="margin-top:8px;">+ Hinzufügen</button>
+
+      <div class="actions">
+        <button onclick="this.closest('.modal-back').remove()">Abbrechen</button>
+        <button class="primary" onclick="saveSettings()">Speichern</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(back);
+  renderIndicatorEditor();
+}
+
+function renderIndicatorEditor() {
+  const wrap = document.getElementById("ind-editor");
+  if (!wrap) return;
+  if (settingsDraftIndicators.length === 0) {
+    wrap.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0;">Keine Alarmoptionen.</div>';
+    return;
+  }
+  wrap.innerHTML = settingsDraftIndicators.map((ind, i) => `
+    <div style="display:flex;gap:8px;align-items:center;margin-top:6px;">
+      <input type="text" value="${escapeAttr(ind.label)}" oninput="settingsDraftIndicators[${i}].label = this.value" placeholder="Bezeichnung (z.B. 1-19, ÖL-A, Zug 1)">
+      <button class="icon-btn" onclick="moveDraftIndicator(${i}, -1)" title="Hoch">↑</button>
+      <button class="icon-btn" onclick="moveDraftIndicator(${i}, 1)" title="Runter">↓</button>
+      <button class="icon-btn danger" onclick="removeDraftIndicator(${i})">×</button>
+    </div>
+  `).join("");
+}
+
+function addDraftIndicator() {
+  settingsDraftIndicators.push({ key: "ind_" + crypto.randomUUID(), label: "Neue Option" });
+  renderIndicatorEditor();
+}
+
+function removeDraftIndicator(i) {
+  settingsDraftIndicators.splice(i, 1);
+  renderIndicatorEditor();
+}
+
+function moveDraftIndicator(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= settingsDraftIndicators.length) return;
+  [settingsDraftIndicators[i], settingsDraftIndicators[j]] = [settingsDraftIndicators[j], settingsDraftIndicators[i]];
+  renderIndicatorEditor();
+}
+
+function saveSettings() {
+  state.settings = {
+    sleepFrom: document.getElementById("set-sleep-from").value || DEFAULTS.sleepFrom,
+    sleepTo: document.getElementById("set-sleep-to").value || DEFAULTS.sleepTo,
+    blackscreenAuto: document.getElementById("set-black-auto").checked,
+    alarmDurationSec: parseInt(document.getElementById("set-alarm-dur").value, 10) || DEFAULTS.alarmDurationSec,
+    defaultDescription: document.getElementById("set-default-desc").value || DEFAULTS.defaultDescription,
+    defaultAddress: document.getElementById("set-default-addr").value || DEFAULTS.defaultAddress,
+    indicators: settingsDraftIndicators.filter(i => i.label.trim() !== ""),
+  };
+  // prune removed indicators from operations
+  const validKeys = new Set(state.settings.indicators.map(i => i.key));
+  state.operations.forEach(op => {
+    Object.keys(op.indicators).forEach(k => {
+      if (!validKeys.has(k)) delete op.indicators[k];
+    });
+    state.settings.indicators.forEach(ind => {
+      if (!(ind.key in op.indicators)) op.indicators[ind.key] = false;
+    });
+  });
+  save();
+  document.querySelector(".modal-back")?.remove();
+  renderSetup();
+  flashToast("Einstellungen gespeichert");
+}
+
+// ---------------- Export / Import ----------------
+function exportConfig() {
+  const blob = new Blob([JSON.stringify({ operations: state.operations, settings: state.settings }, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "alarm-config.json";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importConfig(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      // accept new shape or legacy array form
+      if (Array.isArray(parsed)) {
+        const ops = parsed.slice(1).map(o => ({
+          id: crypto.randomUUID(),
+          description: o.operationDescription || "",
+          address: o.address || "",
+          date: o.operationDate || "",
+          time: o.operationTime || "",
+          indicators: Object.fromEntries(indicators().map(i => [i.key, o[i.key] === "on" || o[i.key] === true])),
+        }));
+        state.operations = ops;
+      } else {
+        state.operations = parsed.operations || [];
+        if (parsed.settings) state.settings = { ...DEFAULTS, ...parsed.settings };
+      }
+      save();
+      renderSetup();
+      flashToast(`${state.operations.length} Einsätze geladen`);
+    } catch (e) {
+      alert("Import fehlgeschlagen: " + e.message);
+    }
+  };
+  reader.readAsText(file);
+  ev.target.value = "";
+}
+
+// ---------------- View routing ----------------
+function goDisplay() {
+  runtime.view = "display";
+  document.getElementById("setup-view").style.display = "none";
+  document.getElementById("display-view").style.display = "grid";
+  document.body.classList.remove("scroll");
+  buildDisplayUI();
+  if (!runtime.audioUnlocked) {
+    document.getElementById("gate").style.display = "flex";
+  } else {
+    startDisplayLoop();
+  }
+}
+
+function goSetup() {
+  // fully end any active alarm before leaving the display
+  if (runtime.alarmActive) endAlarm();
+  if (loopHandle) { clearInterval(loopHandle); loopHandle = null; }
+  runtime.view = "setup";
+  document.getElementById("display-view").style.display = "none";
+  document.getElementById("setup-view").style.display = "block";
+  document.body.classList.add("scroll");
+  document.body.classList.remove("alarm", "blackscreen");
+  renderSetup();
+}
+
+function unlockAndStart() {
+  const audio = document.getElementById("alarm-audio");
+  audio.muted = true;
+  audio.play().then(() => {
+    audio.pause();
+    audio.currentTime = 0;
+    audio.muted = false;
+    runtime.audioUnlocked = true;
+    document.getElementById("gate").style.display = "none";
+    startDisplayLoop();
+  }).catch(() => {
+    runtime.audioUnlocked = true;
+    document.getElementById("gate").style.display = "none";
+    startDisplayLoop();
+  });
+}
+
+// ---------------- Display ----------------
+function buildDisplayUI() {
+  const wrap = document.getElementById("indicators");
+  const inds = indicators();
+  if (inds.length === 0) {
+    wrap.style.display = "none";
+  } else {
+    wrap.style.display = "grid";
+    const cols = Math.min(inds.length, 4);
+    wrap.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    wrap.innerHTML = inds.map(ind =>
+      `<div class="indicator" data-key="${ind.key}">${escapeAttr(ind.label)}</div>`
+    ).join("");
+  }
+  setDefaults();
+}
+
+function setDefaults() {
+  document.getElementById("desc-text").textContent = state.settings.defaultDescription;
+  document.getElementById("addr-text").textContent = state.settings.defaultAddress;
+  document.getElementById("status-title").textContent = "Bereitschaft";
+  document.querySelectorAll(".indicator").forEach(el => el.classList.remove("on"));
+  document.body.classList.remove("alarm");
+  showPlaceholder();
+}
+
+function showPlaceholder() {
+  document.getElementById("map-placeholder").style.display = "flex";
+  document.getElementById("map").style.display = "none";
+}
+
+function showMap(address) {
+  // Leaflet unavailable (offline, CDN blocked) — silently fall back to placeholder
+  if (typeof L === "undefined") { showPlaceholder(); return; }
+  try {
+    document.getElementById("map-placeholder").style.display = "none";
+    const mapEl = document.getElementById("map");
+    mapEl.style.display = "block";
+    if (!runtime.map) {
+      runtime.map = L.map("map", { zoomControl: false }).setView([48.4, 9.4], 12);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 18,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      }).addTo(runtime.map);
+    }
+    setTimeout(() => { try { runtime.map.invalidateSize(); } catch {} }, 100);
+    // geocode via Nominatim
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(address)}`, {
+      headers: { "Accept": "application/json" }
+    })
+      .then(r => r.json())
+      .then(results => {
+        if (results && results.length > 0) {
+          const { lat, lon } = results[0];
+          const ll = [parseFloat(lat), parseFloat(lon)];
+          runtime.map.setView(ll, 16);
+          if (runtime.marker) runtime.marker.remove();
+          runtime.marker = L.marker(ll).addTo(runtime.map);
+        }
+      })
+      .catch(() => { /* offline geocoder — keep default view */ });
+  } catch (e) {
+    console.warn("map unavailable:", e);
+    showPlaceholder();
+  }
+}
+
+function tickClock() {
+  const now = new Date();
+  document.getElementById("clock").textContent = now.toLocaleTimeString("de-DE");
+}
+
+function checkAlarms() {
+  if (runtime.alarmActive) return;
+  const now = new Date();
+  for (const op of state.operations) {
+    const dt = new Date(`${op.date}T${op.time}`);
+    if (isNaN(dt)) continue;
+    const dtKey = dt.toISOString();
+    if (runtime.firedAt[op.id] === dtKey) continue; // already fired at this scheduled time
+    if (now >= dt && now - dt < STALE_MS) {
+      triggerAlarm(op);
+      return;
+    }
+  }
+}
+
+function triggerAlarm(op) {
+  runtime.alarmActive = true;
+  const dt = new Date(`${op.date}T${op.time}`);
+  if (!isNaN(dt)) runtime.firedAt[op.id] = dt.toISOString();
+  document.body.classList.remove("blackscreen");
+  document.body.classList.add("alarm");
+  document.getElementById("desc-text").textContent = op.description || "Einsatz";
+  document.getElementById("addr-text").textContent = op.address || "";
+  document.getElementById("status-title").textContent = "EINSATZ";
+  document.querySelectorAll(".indicator").forEach(el => {
+    el.classList.toggle("on", !!op.indicators[el.dataset.key]);
+  });
+  if (op.address) showMap(op.address); else showPlaceholder();
+
+  // sound
+  const audio = document.getElementById("alarm-audio");
+  audio.loop = true;
+  audio.currentTime = 0;
+  audio.play().catch(e => console.warn("audio play failed", e));
+
+  if (runtime.alarmTimeoutId) clearTimeout(runtime.alarmTimeoutId);
+  runtime.alarmTimeoutId = setTimeout(endAlarm, state.settings.alarmDurationSec * 1000);
+}
+
+function endAlarm() {
+  if (runtime.alarmTimeoutId) { clearTimeout(runtime.alarmTimeoutId); runtime.alarmTimeoutId = null; }
+  runtime.alarmActive = false;
+  const audio = document.getElementById("alarm-audio");
+  audio.pause();
+  audio.loop = false;
+  audio.currentTime = 0;
+  if (runtime.view === "display") {
+    setDefaults();
+    applyBlackscreen();
+  }
+}
+
+function isInSleepWindow() {
+  const now = new Date();
+  const [fh, fm] = state.settings.sleepFrom.split(":").map(Number);
+  const [th, tm] = state.settings.sleepTo.split(":").map(Number);
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const fromMin = fh * 60 + fm;
+  const toMin = th * 60 + tm;
+  if (fromMin < toMin) return nowMin >= fromMin && nowMin < toMin;
+  return nowMin >= fromMin || nowMin < toMin; // crosses midnight
+}
+
+function applyBlackscreen() {
+  if (runtime.alarmActive) { document.body.classList.remove("blackscreen"); return; }
+  if (runtime.forceBlack) { document.body.classList.add("blackscreen"); return; }
+  if (runtime.manualBlack) { document.body.classList.remove("blackscreen"); return; }
+  if (state.settings.blackscreenAuto && isInSleepWindow()) {
+    document.body.classList.add("blackscreen");
+  } else {
+    document.body.classList.remove("blackscreen");
+  }
+}
+
+let loopHandle = null;
+function startDisplayLoop() {
+  if (loopHandle) clearInterval(loopHandle);
+  tickClock();
+  checkAlarms();
+  applyBlackscreen();
+  loopHandle = setInterval(() => {
+    tickClock();
+    checkAlarms();
+    applyBlackscreen();
+  }, 1000);
+}
+
+// ---------------- Keyboard ----------------
+document.addEventListener("keydown", e => {
+  if (runtime.view !== "display") {
+    if (e.key === "Escape") return;
+    return;
+  }
+  if (e.key === "F11") {
+    e.preventDefault();
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
+  } else if (e.key === "F12") {
+    e.preventDefault();
+    runtime.forceBlack = !runtime.forceBlack;
+    applyBlackscreen();
+  } else if (e.key === "F9") {
+    runtime.manualBlack = !runtime.manualBlack;
+    applyBlackscreen();
+  } else if (e.key === "Escape") {
+    goSetup();
+  }
+});
+
+// ---------------- Boot ----------------
+load();
+goSetup();
+</script>
+
+</body>
+</html>
