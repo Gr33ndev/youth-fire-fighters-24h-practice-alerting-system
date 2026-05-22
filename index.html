@@ -521,6 +521,7 @@ function openSettings() {
         <label>Alarmierungsart</label>
         <select id="set-alarm-mode">
           <option value="both" ${s.alarmMode === "both" ? "selected" : ""}>Sirene + Sprachausgabe (abwechselnd)</option>
+          <option value="parallel" ${s.alarmMode === "parallel" ? "selected" : ""}>Sirene + Sprachausgabe (gleichzeitig)</option>
           <option value="sound" ${s.alarmMode === "sound" ? "selected" : ""}>Nur Sirene</option>
           <option value="speech" ${s.alarmMode === "speech" ? "selected" : ""}>Nur Sprachausgabe</option>
         </select>
@@ -812,11 +813,17 @@ function joinAnd(items) {
   return items.slice(0, -1).join(", ") + " und " + items[items.length - 1];
 }
 
+// Convert vehicle codes like "1/42" or "1-42" to "1 42" so German TTS
+// reads them as "eins zweiundvierzig" instead of interpreting as date.
+function speakifyLabel(label) {
+  return String(label).replace(/(\d)\s*[\/\-]\s*(\d)/g, "$1 $2");
+}
+
 function buildSpeechText(op) {
-  const on = indicators().filter(ind => op.indicators[ind.key]).map(ind => ind.label);
+  const on = indicators().filter(ind => op.indicators[ind.key]).map(ind => speakifyLabel(ind.label));
   const lead = on.length ? "Einsatz für " + joinAnd(on) : "Einsatz";
   const parts = [lead];
-  if (op.description) parts.push(op.description);
+  if (op.description) parts.push(speakifyLabel(op.description));
   if (op.address) parts.push(op.address);
   return parts.join(", ") + ".";
 }
@@ -856,9 +863,27 @@ function wait(ms) {
   });
 }
 
+function startLoopingAudio() {
+  const audio = document.getElementById("alarm-audio");
+  audio.loop = true;
+  audio.currentTime = 0;
+  audio.play().catch(e => console.warn("audio play failed", e));
+}
+
 async function runAlarmSequence(op, endTime) {
   const text = buildSpeechText(op);
   const mode = state.settings.alarmMode || "both";
+
+  if (mode === "parallel") {
+    startLoopingAudio();
+    while (runtime.alarmActive && Date.now() < endTime) {
+      if (text) await speak(text);
+      if (!runtime.alarmActive || Date.now() >= endTime) break;
+      await wait(800);
+    }
+    return;
+  }
+
   while (runtime.alarmActive && Date.now() < endTime) {
     if (mode === "sound" || mode === "both") {
       await playAudioOnce();
