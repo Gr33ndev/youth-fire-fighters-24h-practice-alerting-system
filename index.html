@@ -682,6 +682,17 @@ function goSetup() {
 }
 
 function unlockAndStart() {
+  // Prime speechSynthesis inside the user gesture (iOS Safari needs this,
+  // otherwise later speak() calls from timers are silently dropped).
+  try {
+    if ("speechSynthesis" in window) {
+      const u = new SpeechSynthesisUtterance(" ");
+      u.volume = 0;
+      u.lang = "de-DE";
+      speechSynthesis.speak(u);
+    }
+  } catch {}
+
   const audio = document.getElementById("alarm-audio");
   audio.muted = true;
   audio.play().then(() => {
@@ -844,7 +855,8 @@ function playAudioOnce() {
 function speak(text) {
   return new Promise(resolve => {
     if (!("speechSynthesis" in window) || !text) { resolve(); return; }
-    try { speechSynthesis.cancel(); } catch {}
+    // Don't call cancel() here — it can race on iOS Safari and swallow the
+    // utterance. endAlarm() owns cancellation via runtime.abortStep.
     const u = new SpeechSynthesisUtterance(text);
     u.lang = "de-DE";
     u.rate = 0.95;
