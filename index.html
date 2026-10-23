@@ -119,7 +119,8 @@
     overflow: hidden; display: flex; flex-direction: column; min-height: 0;
   }
   .map-head { padding: 12px 16px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
-  #map { flex: 1; background: var(--panel-2); }
+  #map, #map-embed { flex: 1; background: var(--panel-2); }
+  #map-embed { border: 0; width: 100%; }
   .map-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 12px; color: var(--muted); padding: 20px; text-align: center; }
   .map-placeholder .fire { font-size: 64px; }
 
@@ -255,6 +256,7 @@
         <div>Kein aktueller Einsatz</div>
       </div>
       <div id="map" style="display: none;"></div>
+      <iframe id="map-embed" title="Einsatzort" style="display: none;"></iframe>
     </div>
   </div>
 
@@ -332,6 +334,8 @@ let runtime = {
   firedAt: {},           // opId -> ISO of scheduled dt when fired; mismatch on edit re-arms op
   map: null,
   marker: null,
+  mapPos: null,          // [lat, lon] of the current alarm address, once geocoded
+  useEmbed: false,       // OSM tiles blocked — show the openstreetmap.org embed instead
   abortStep: null,       // resolves the in-flight alarm sequence step (audio or speech)
 };
 
@@ -730,56 +734,74 @@ function setDefaults() {
 function showPlaceholder() {
   document.getElementById("map-placeholder").style.display = "flex";
   document.getElementById("map").style.display = "none";
+  document.getElementById("map-embed").style.display = "none";
+}
+
+// OSM tile servers reject requests without a Referer (403 "Access blocked"), and pages
+// opened via file:// can't send one. There we embed openstreetmap.org's own map in an
+// iframe instead: its tiles are requested from openstreetmap.org and carry a Referer.
+function showEmbed(ll) {
+  // alarm already over (late geocode / tile error) — keep the placeholder
+  if (document.getElementById("map-placeholder").style.display !== "none") return;
+  document.getElementById("map").style.display = "none";
+  const frame = document.getElementById("map-embed");
+  frame.style.display = "block";
+  const [lat, lon] = ll || [48.4, 9.4];
+  const d = ll ? 0.006 : 0.15;
+  const bbox = [lon - d, lat - d * 0.6, lon + d, lat + d * 0.6].join(",");
+  frame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik`
+    + (ll ? `&marker=${lat},${lon}` : "");
+}
+
+// geocode via Nominatim; resolves to [lat, lon] or null (offline / not found)
+function geocode(address) {
+  return fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(address)}`, {
+    headers: { "Accept": "application/json" }
+  })
+    .then(r => r.json())
+    .then(results => results && results.length > 0
+      ? [parseFloat(results[0].lat), parseFloat(results[0].lon)] : null)
+    .catch(() => null);
 }
 
 function showMap(address) {
-  // Leaflet unavailable (offline, CDN blocked) — silently fall back to placeholder
-  if (typeof L === "undefined") { showPlaceholder(); return; }
+  document.getElementById("map-placeholder").style.display = "none";
+  runtime.mapPos = null;
+  const located = geocode(address).then(ll => { if (ll) runtime.mapPos = ll; return ll; });
+  if (runtime.useEmbed || typeof L === "undefined" || !location.protocol.startsWith("http")) {
+    showEmbed(null);
+    located.then(ll => { if (ll) showEmbed(ll); });
+    return;
+  }
   try {
-    document.getElementById("map-placeholder").style.display = "none";
-    const mapEl = document.getElementById("map");
-    mapEl.style.display = "block";
+    document.getElementById("map-embed").style.display = "none";
+    document.getElementById("map").style.display = "block";
     if (!runtime.map) {
       runtime.map = L.map("map", { zoomControl: false }).setView([48.4, 9.4], 12);
-      // OSM blocks tile requests without a Referer (403 "Access blocked"). Pages opened via
-      // file:// can't send one, so use CARTO tiles there and fall back to them on tile errors.
-      const osmAttr = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
-      const cartoLayer = () => L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-        maxZoom: 19, subdomains: "abcd",
-        attribution: osmAttr + ' &copy; <a href="https://carto.com/attributions">CARTO</a>'
+      const osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19, referrerPolicy: "strict-origin-when-cross-origin",
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
       });
-      if (location.protocol.startsWith("http")) {
-        const osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          maxZoom: 19, referrerPolicy: "strict-origin-when-cross-origin", attribution: osmAttr
-        });
-        let errors = 0;
-        osm.on("tileerror", () => {
-          if (++errors === 3) { runtime.map.removeLayer(osm); cartoLayer().addTo(runtime.map); }
-        });
-        osm.addTo(runtime.map);
-      } else {
-        cartoLayer().addTo(runtime.map);
-      }
+      // tiles still blocked (e.g. referrer stripped by the host) — switch to the embed for good
+      let errors = 0;
+      osm.on("tileerror", () => {
+        if (++errors === 3) { runtime.useEmbed = true; showEmbed(runtime.mapPos); }
+      });
+      osm.addTo(runtime.map);
     }
     setTimeout(() => { try { runtime.map.invalidateSize(); } catch {} }, 100);
-    // geocode via Nominatim
-    fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(address)}`, {
-      headers: { "Accept": "application/json" }
-    })
-      .then(r => r.json())
-      .then(results => {
-        if (results && results.length > 0) {
-          const { lat, lon } = results[0];
-          const ll = [parseFloat(lat), parseFloat(lon)];
-          runtime.map.setView(ll, 16);
-          if (runtime.marker) runtime.marker.remove();
-          runtime.marker = L.marker(ll).addTo(runtime.map);
-        }
-      })
-      .catch(() => { /* offline geocoder — keep default view */ });
+    located.then(ll => {
+      if (!ll) return;
+      if (runtime.useEmbed) { showEmbed(ll); return; }
+      runtime.map.setView(ll, 16);
+      if (runtime.marker) runtime.marker.remove();
+      runtime.marker = L.marker(ll).addTo(runtime.map);
+    });
   } catch (e) {
     console.warn("map unavailable:", e);
-    showPlaceholder();
+    runtime.useEmbed = true;
+    showEmbed(null);
+    located.then(ll => { if (ll) showEmbed(ll); });
   }
 }
 
