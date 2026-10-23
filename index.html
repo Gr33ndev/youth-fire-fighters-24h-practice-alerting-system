@@ -741,10 +741,25 @@ function showMap(address) {
     mapEl.style.display = "block";
     if (!runtime.map) {
       runtime.map = L.map("map", { zoomControl: false }).setView([48.4, 9.4], 12);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 18,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-      }).addTo(runtime.map);
+      // OSM blocks tile requests without a Referer (403 "Access blocked"). Pages opened via
+      // file:// can't send one, so use CARTO tiles there and fall back to them on tile errors.
+      const osmAttr = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+      const cartoLayer = () => L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+        maxZoom: 19, subdomains: "abcd",
+        attribution: osmAttr + ' &copy; <a href="https://carto.com/attributions">CARTO</a>'
+      });
+      if (location.protocol.startsWith("http")) {
+        const osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19, referrerPolicy: "strict-origin-when-cross-origin", attribution: osmAttr
+        });
+        let errors = 0;
+        osm.on("tileerror", () => {
+          if (++errors === 3) { runtime.map.removeLayer(osm); cartoLayer().addTo(runtime.map); }
+        });
+        osm.addTo(runtime.map);
+      } else {
+        cartoLayer().addTo(runtime.map);
+      }
     }
     setTimeout(() => { try { runtime.map.invalidateSize(); } catch {} }, 100);
     // geocode via Nominatim
